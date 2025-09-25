@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace TiendaUCN.Domain.Models
+namespace TiendaUCN.src.Domain.Models
 {
     public class Role : IdentityRole<int>
     {
