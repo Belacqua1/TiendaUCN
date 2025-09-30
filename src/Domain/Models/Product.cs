@@ -3,7 +3,7 @@ namespace TiendaUCN.src.Domain.Models
     public class Product
     {
         public int Id { get; set; }
-        public required string Tittle { get; set; }
+        public required string Title { get; set; }
         public required string Description { get; set; }
         public required decimal Price { get; set; }
         public int discount { get; set; }
