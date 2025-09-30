@@ -21,15 +21,15 @@ builder.Host.UseSerilog(
 #endregion
 
 
-    #region Database Configuration
-    Log.Information("Configurando base de datos SQlite");
+#region Database Configuration
+Log.Information("Configurando base de datos SQlite");
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlite(builder.Configuration.GetSection("ConnectionStrings:SqliteDatabase").Value)
 );
 #endregion
 
 var app = builder.Build();
-#region Database Migration 
+#region Database Migration
 Log.Information("Aplicando migraciones a la base de datos");
 using (var scope = app.Services.CreateScope())
 {
