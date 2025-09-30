@@ -47,11 +47,11 @@ namespace TiendaUCN.src.Application.Services.Implements
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 return new GenericResponse<string>($"Error al crear el usuario: {errors}", null);
             }
-            if (!await _roleManager.RoleExistsAsync("Cliente"))
+            if (!await _roleManager.RoleExistsAsync("Customer"))
             {
-                await _roleManager.CreateAsync(new Role { Name = "Cliente" });
+                await _roleManager.CreateAsync(new Role { Name = "Customer" });
             }
-            await _userManager.AddToRoleAsync(user, "Cliente");
+            await _userManager.AddToRoleAsync(user, "Customer");
             return new GenericResponse<string>("Usuario registrado exitosamente", null);
         }
     }
