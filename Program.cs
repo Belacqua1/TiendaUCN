@@ -4,6 +4,13 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder
+    .Services.AddIdentity<User, Role>()
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddOpenApi();
 #region Loggin Configuration
 builder.Host.UseSerilog(
