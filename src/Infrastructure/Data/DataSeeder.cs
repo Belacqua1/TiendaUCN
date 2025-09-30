@@ -168,28 +168,28 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                             .RuleFor(p => p.Stock, f => f.Random.Int(1, 100))
                             .RuleFor(p => p.CategoryId, f => f.PickRandom(categoryIds))
                             .RuleFor(p => p.BrandId, f => f.PickRandom(brandIds))
-                            .RuleFor(p => p.Status, f => f.PickRandom<Status>());
+                            .RuleFor(p => p.Status, f => "Nuevo");
 
                         var products = productFaker.Generate(50);
                         await context.Products.AddRangeAsync(products);
                         await context.SaveChangesAsync();
                         Log.Information("Productos creados con éxito.");
                     }
+    //pendiente*****
+                    // Creación de imágenes: 
+                    //if (!await context.Images.AnyAsync())
+                    //{
+                    //    var productIds = await context.Products.Select(p => p.Id).ToListAsync();
+                    //    var imageFaker = new Faker<Image>()
+                    //        .RuleFor(i => i.ImageUrl, f => f.Image.PicsumUrl())
+                    //        .RuleFor(i => i.PublicId, f => f.Random.Guid().ToString())
+                    //        .RuleFor(i => i.ProductId, f => f.PickRandom(productIds));
 
-                    // Creación de imágenes
-                    if (!await context.Images.AnyAsync())
-                    {
-                        var productIds = await context.Products.Select(p => p.Id).ToListAsync();
-                        var imageFaker = new Faker<Image>()
-                            .RuleFor(i => i.ImageUrl, f => f.Image.PicsumUrl())
-                            .RuleFor(i => i.PublicId, f => f.Random.Guid().ToString())
-                            .RuleFor(i => i.ProductId, f => f.PickRandom(productIds));
-
-                        var images = imageFaker.Generate(20);
-                        await context.Images.AddRangeAsync(images);
-                        await context.SaveChangesAsync();
-                        Log.Information("Imágenes creadas con éxito.");
-                    }
+                    //    var images = imageFaker.Generate(20);
+                    //    await context.Images.AddRangeAsync(images);
+                    //    await context.SaveChangesAsync();
+                    //    Log.Information("Imágenes creadas con éxito.");
+                    //}
                 }
             }
             catch (Exception ex)
