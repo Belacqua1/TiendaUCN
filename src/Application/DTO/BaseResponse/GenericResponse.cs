@@ -1,5 +1,3 @@
-using TIENDAUCN.src.Application.DTO.BaseResponse;
-
 namespace TiendaUCN.src.Application.DTO.BaseResponse
 {
     public class GenericResponse<T>(string message, T? data = default)

@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Tienda_UCN_api.src.Infrastructure.Data;
+using TiendaUCN.src.Application.Services.Implements;
+using TiendaUCN.src.Application.Services.Interfaces;
+using TiendaUCN.src.Domain.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,14 +16,16 @@ builder
     .AddEntityFrameworkStores<DataContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddControllers();
+
 builder.Services.AddOpenApi();
+
 #region Loggin Configuration
 builder.Host.UseSerilog(
     (context, services, configuration) =>
         configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
 );
 #endregion
-
 
 #region Database Configuration
 Log.Information("Configurando base de datos SQlite");
@@ -29,13 +35,13 @@ builder.Services.AddDbContext<DataContext>(options =>
 #endregion
 
 var app = builder.Build();
+
 #region Database Migration
 Log.Information("Aplicando migraciones a la base de datos");
 using (var scope = app.Services.CreateScope())
 {
     await DataSeeder.Initialize(scope.ServiceProvider);
 }
-
 #endregion
 
 // Configure the HTTP request pipeline.
@@ -43,4 +49,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// Mapear endpoints de controladores
+app.MapControllers();
+
 app.Run();

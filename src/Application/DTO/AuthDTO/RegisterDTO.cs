@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace TiendaUCN.src.Application.DTO.AuthDTO
 {
-    public class Register
+    public class RegisterDTO
     {
         public required string Email { get; set; }
         public required string Password { get; set; }

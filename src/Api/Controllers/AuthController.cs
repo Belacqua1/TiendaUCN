@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+using TiendaUCN.src.Application.DTO.AuthDTO;
+using TiendaUCN.src.Application.DTO.BaseResponse;
+using TiendaUCN.src.Application.Services.Interfaces;
+
 namespace TiendaUCN.src.Api.Controllers
 {
     [ApiController]
