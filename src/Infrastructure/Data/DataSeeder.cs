@@ -27,7 +27,6 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                 var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
-                await context.Database.EnsureCreatedAsync();
                 await context.Database.MigrateAsync();
                 var genders =
                     configuration.GetSection("User:Gender").Get<string[]>()
