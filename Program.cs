@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Tienda_UCN_api.src.Infrastructure.Data;
+using TiendaUCN.src.Application.Services.Implements; // <-- Asegúrate de usar tu namespace correcto
+using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +40,12 @@ builder
     .AddDefaultTokenProviders();
 #endregion
 
-// Controllers (si tu API los usa)
+#region Application Services
+// Registrar tus servicios de aplicación aquí
+builder.Services.AddScoped<IUserService, UserService>();
+#endregion
+
+// Controllers
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -56,5 +63,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.MapControllers();
 
 app.Run();
