@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Resend;
 using Serilog;
 using Tienda_UCN_api.src.Infrastructure.Data;
-using TiendaUCN.src.Application.Services.Implements; // <-- Asegúrate de usar tu namespace correcto
+using TiendaUCN.src.Application.Services.Implements;
 using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
 
@@ -19,9 +20,9 @@ builder.Host.UseSerilog(
 #endregion
 
 #region Database Configuration
-Log.Information("Configurando base de datos SQlite");
+Log.Information("Configurando base de datos SQLite");
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlite(builder.Configuration.GetSection("ConnectionStrings:SqliteDatabase").Value)
+    options.UseSqlite(builder.Configuration.GetConnectionString("SqliteDatabase"))
 );
 #endregion
 
@@ -40,8 +41,23 @@ builder
     .AddDefaultTokenProviders();
 #endregion
 
+#region Email Service Configuration
+Log.Information("Configurando servicio de Email");
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o =>
+{
+    o.ApiToken =
+        builder.Configuration["ResendAPIKey"]
+        ?? throw new InvalidOperationException("El token de API de Resend no está configurado.");
+});
+builder.Services.AddTransient<IResend, ResendClient>();
+#endregion
+
 #region Application Services
-// Registrar tus servicios de aplicación aquí
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IVerificationService, VerificationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 #endregion
 
@@ -65,5 +81,4 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-
 app.Run();

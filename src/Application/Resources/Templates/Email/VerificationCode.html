@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificación de correo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            margin: 50px auto;
+            padding: 20px;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4CAF50;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .footer {
+            font-size: 0.8rem;
+            color: #999;
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>¡Bienvenido a Tienda UCN!</h2>
+        <p>Para verificar tu correo electrónico, ingresa el siguiente código:</p>
+        <div class="code">{{CODE}}</div>
+        <p>Este código expira en 10 minutos.</p>
+        <div class="footer">
+            Si no solicitaste este correo, ignóralo.
+        </div>
+    </div>
+</body>
+</html>

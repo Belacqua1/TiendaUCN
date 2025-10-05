@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using TiendaUCN.src.Application.DTO.AuthDTO;
-using TiendaUCN.src.Application.DTO.BaseResponse;
 using TiendaUCN.src.Application.Services.Interfaces;
 
 namespace TiendaUCN.src.Api.Controllers
@@ -10,10 +9,12 @@ namespace TiendaUCN.src.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IVerificationService _verificationService;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IVerificationService verificationService)
         {
             _userService = userService;
+            _verificationService = verificationService;
         }
 
         [HttpPost("register")]
@@ -26,9 +27,26 @@ namespace TiendaUCN.src.Api.Controllers
             var response = await _userService.RegisterAsync(registerDto, clientIp);
 
             if (response.Message.Contains("ya existe") || response.Message.Contains("Error"))
-                return BadRequest(response);
+                return BadRequest(new { success = false, message = response.Message });
 
-            return Ok(response);
+            return Created(
+                string.Empty,
+                new
+                {
+                    success = true,
+                    message = "Cuenta creada exitosamente. Se envió un código de verificación al correo.",
+                }
+            );
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyCodeDTO dto)
+        {
+            var success = await _verificationService.VerifyCodeAsync(dto.Email, dto.Code);
+            if (!success)
+                return BadRequest(new { message = "Código inválido o expirado." });
+
+            return Ok(new { message = "Correo verificado correctamente." });
         }
     }
 }
