@@ -4,6 +4,10 @@ using TiendaUCN.src.Application.Services.Interfaces;
 
 namespace TiendaUCN.src.Api.Controllers
 {
+    /// <summary>
+    /// Controller responsible for user authentication and registration endpoints.
+    /// Handles registration, email verification, and related operations.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -11,24 +15,40 @@ namespace TiendaUCN.src.Api.Controllers
         private readonly IUserService _userService;
         private readonly IVerificationService _verificationService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthController"/> class.
+        /// </summary>
+        /// <param name="userService">Service to handle user-related operations.</param>
+        /// <param name="verificationService">Service to handle email verification logic.</param>
         public AuthController(IUserService userService, IVerificationService verificationService)
         {
             _userService = userService;
             _verificationService = verificationService;
         }
 
+        /// <summary>
+        /// Registers a new user.
+        /// Validates input, creates the user, assigns a role, and sends a verification code.
+        /// </summary>
+        /// <param name="registerDto">Data transfer object containing registration information.</param>
+        /// <returns>
+        /// Returns a 201 Created with success message if registration succeeds.
+        /// Returns a 400 BadRequest if the email or RUT already exists, or if an error occurs.
+        /// </returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerDto)
         {
-            // Extract client IP address
+            // Extract client IP address for logging or auditing purposes
             var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString();
 
             // Call the user service to register the user
             var response = await _userService.RegisterAsync(registerDto, clientIp);
 
+            // Check for duplicate or error messages
             if (response.Message.Contains("ya existe") || response.Message.Contains("Error"))
                 return BadRequest(new { success = false, message = response.Message });
 
+            // Return success response with information about verification code
             return Created(
                 string.Empty,
                 new
@@ -39,10 +59,21 @@ namespace TiendaUCN.src.Api.Controllers
             );
         }
 
+        /// <summary>
+        /// Verifies a user's email using a previously sent verification code.
+        /// Activates the account if the code is valid and sends a welcome email.
+        /// </summary>
+        /// <param name="dto">Data transfer object containing the email and verification code.</param>
+        /// <returns>
+        /// Returns a 200 OK if the code is valid.
+        /// Returns a 400 BadRequest if the code is invalid or expired.
+        /// </returns>
         [HttpPost("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyCodeDTO dto)
         {
+            // Attempt to verify the code using the verification service
             var success = await _verificationService.VerifyCodeAsync(dto.Email, dto.Code);
+
             if (!success)
                 return BadRequest(new { message = "Código inválido o expirado." });
 
