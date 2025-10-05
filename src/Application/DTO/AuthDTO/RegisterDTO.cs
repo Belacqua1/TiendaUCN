@@ -2,8 +2,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TiendaUCN.src.Application.DTO.AuthDTO
 {
+    /// <summary>
+    /// Data transfer object for registering a new user.
+    /// Includes validation rules for all user properties.
+    /// </summary>
     public class RegisterDTO
     {
+        /// <summary>
+        /// Gets or sets the user's first name.
+        /// Only letters and spaces are allowed (2-50 characters).
+        /// </summary>
         [Required(ErrorMessage = "El nombre es obligatorio.")]
         [RegularExpression(
             @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$",
@@ -11,6 +19,10 @@ namespace TiendaUCN.src.Application.DTO.AuthDTO
         )]
         public string FirstName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the user's last name.
+        /// Only letters and spaces are allowed (2-50 characters).
+        /// </summary>
         [Required(ErrorMessage = "El apellido es obligatorio.")]
         [RegularExpression(
             @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$",
@@ -18,6 +30,10 @@ namespace TiendaUCN.src.Application.DTO.AuthDTO
         )]
         public string LastName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the user's gender.
+        /// Must be 'Masculino', 'Femenino' or 'Otro'.
+        /// </summary>
         [Required(ErrorMessage = "El género es obligatorio.")]
         [RegularExpression(
             @"^(Masculino|Femenino|Otro)$",
@@ -25,19 +41,35 @@ namespace TiendaUCN.src.Application.DTO.AuthDTO
         )]
         public string Gender { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the user's birth date.
+        /// Must be a valid date and the user must be over 18.
+        /// </summary>
         [Required(ErrorMessage = "La fecha de nacimiento es obligatoria.")]
         [DataType(DataType.Date)]
         [CustomValidation(typeof(RegisterDTO), nameof(ValidateBirthDate))]
         public DateTime BirthDate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user's RUT (Chilean ID).
+        /// Must be valid according to Chilean RUT rules.
+        /// </summary>
         [Required(ErrorMessage = "El RUT es obligatorio.")]
         [CustomValidation(typeof(RegisterDTO), nameof(ValidateRUT))]
         public string Rut { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the user's email address.
+        /// Must be a valid email format.
+        /// </summary>
         [Required(ErrorMessage = "El email es obligatorio.")]
         [EmailAddress(ErrorMessage = "El email no tiene un formato válido.")]
         public string Email { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the user's phone number.
+        /// Must be a valid Chilean phone number format.
+        /// </summary>
         [Required(ErrorMessage = "El teléfono es obligatorio.")]
         [RegularExpression(
             @"^(\+?56)?0?(?:[2-9]\d{7})$",
@@ -45,6 +77,10 @@ namespace TiendaUCN.src.Application.DTO.AuthDTO
         )]
         public string Phone { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the user's password.
+        /// Must have at least 8 characters, uppercase, lowercase, number, and special character.
+        /// </summary>
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
         [DataType(DataType.Password)]
         [RegularExpression(
@@ -53,10 +89,18 @@ namespace TiendaUCN.src.Application.DTO.AuthDTO
         )]
         public string Password { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the password confirmation.
+        /// Must match the Password property.
+        /// </summary>
         [Required(ErrorMessage = "Debe confirmar la contraseña.")]
         [Compare("Password", ErrorMessage = "La confirmación de contraseña no coincide.")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Custom validation method for BirthDate.
+        /// Ensures the date is not in the future and the user is at least 18 years old.
+        /// </summary>
         public static ValidationResult? ValidateBirthDate(
             DateTime birthDate,
             ValidationContext context
@@ -75,6 +119,10 @@ namespace TiendaUCN.src.Application.DTO.AuthDTO
             return ValidationResult.Success;
         }
 
+        /// <summary>
+        /// Custom validation method for RUT.
+        /// Ensures the RUT is valid according to Chilean rules.
+        /// </summary>
         public static ValidationResult? ValidateRUT(string rut, ValidationContext context)
         {
             rut = rut.Replace(".", "").Replace("-", "").ToUpper();
