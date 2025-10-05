@@ -39,11 +39,11 @@ namespace TiendaUCN.src.Application.Services.Implements
         /// <param name="email">The recipient's email address.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         /// <exception cref="Exception">Thrown when the user is not found.</exception>
-        public async Task GenerateAndSendCodeAsync(string email)
+        public async Task GenerateAndSendCodeAsync(string email, string nameHtml)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new Exception("Usuario no encontrado.");
 
             // Generate a random 6-digit code
             var code = new Random().Next(100000, 999999).ToString();
@@ -52,7 +52,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             _cache.Set(email, code, TimeSpan.FromMinutes(10));
 
             // Send verification code via email
-            await _emailService.SendVerificationCodeEmailAsync(email, code);
+            await _emailService.SendVerificationCodeEmailAsync(email, code, nameHtml);
         }
 
         /// <summary>
@@ -87,6 +87,26 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             // Send a welcome email
             await _emailService.SendWelcomeEmailAsync(email);
+
+            return true;
+        }
+
+        public async Task<bool> VerifyCodeRecoverAsync(string email, string code)
+        {
+            // Try to retrieve the stored code from cache
+            if (!_cache.TryGetValue(email, out string? storedCode))
+                return false;
+
+            // Check if the provided code matches the stored code
+            if (storedCode != code)
+                return false;
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return false;
+
+            // Remove the code from cache
+            _cache.Remove(email);
 
             return true;
         }
