@@ -97,7 +97,10 @@ namespace TiendaUCN.src.Application.Services.Implements
             {
                 // Generate and send the verification code via email
                 Console.WriteLine($"[DEBUG] Generando código de verificación para {user.Email}");
-                await _verificationService.GenerateAndSendCodeAsync(user.Email);
+                await _verificationService.GenerateAndSendCodeAsync(
+                    user.Email,
+                    nameHtml: "VerificationCode"
+                );
                 Console.WriteLine($"[DEBUG] Código enviado a {user.Email}");
 
                 return new GenericResponse<string>(
@@ -114,6 +117,64 @@ namespace TiendaUCN.src.Application.Services.Implements
                     null
                 );
             }
+        }
+
+        public async Task<GenericResponse<string>> RecoverPasswordAsync(RecoverPasswordDTO dto)
+        {
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+            if (existingUser == null)
+            {
+                return new GenericResponse<string>(
+                    message: "El email no está asociado a ninguna cuenta",
+                    data: null,
+                    success: false
+                );
+            }
+
+            await _verificationService.GenerateAndSendCodeAsync(dto.Email, nameHtml: "RecoverCode");
+
+            return new GenericResponse<string>(
+                message: "Se ha enviado un código de verificación a su correo electrónico.",
+                data: null,
+                success: true
+            );
+        }
+
+        public async Task<GenericResponse<string>> ChangePasswordAsync(ResetPasswordDTO dto)
+        {
+            var isCodeValid = await _verificationService.VerifyCodeRecoverAsync(
+                dto.Email,
+                dto.Code
+            );
+            if (!isCodeValid)
+            {
+                return new GenericResponse<string>(
+                    message: "Código inválido o expirado",
+                    data: null,
+                    success: false
+                );
+            }
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null)
+                return new GenericResponse<string>(message: "Usuario no encontrado.", data: null);
+
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var result = await _userManager.ResetPasswordAsync(user, resetToken, dto.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return new GenericResponse<string>(
+                    message: $"No se pudo cambiar la contraseña: {errors}",
+                    data: null
+                );
+            }
+
+            return new GenericResponse<string>(
+                message: "Contraseña cambiada correctamente.",
+                data: null
+            );
         }
     }
 }
