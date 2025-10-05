@@ -8,8 +8,7 @@ using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
 using Hangfire;
 using Hangfire.SQLite;
-using TiendaUCN.src.Application.Jobs.Interfaces;
-using TiendaUCN.src.Application.Jobs.Implements;
+
 using Microsoft.Data.Sqlite;
 
 /// <summary>
@@ -24,7 +23,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IFileService, FileService>();
 
-builder.Services.AddScoped<IUserJob, UserJob>();
 // OpenAPI
 #region OpenAPI Configuration
 /// <summary>
@@ -151,19 +149,7 @@ Log.Information("Aplicando migraciones a la base de datos");
 using (var scope = app.Services.CreateScope())
 {
     await DataSeeder.Initialize(scope.ServiceProvider);
-    var jobId = nameof(UserJob.DeleteUnconfirmedAsync);
-    RecurringJob.AddOrUpdate<UserJob>(
-        jobId,
-        job => job.DeleteUnconfirmedAsync(),
-        cronExpression,
-        new RecurringJobOptions
-        {
-            TimeZone = timeZone
-        }
-    );
-    Log.Information($"Job recurrente '{jobId}' configurado con cron: {cronExpression} en zona horaria: {timeZone.Id}");
-    //MapperExtensions.ConfigureMapster(scope.ServiceProvider);
-}
+}    
 #endregion
 // Configure HTTP request pipeline
 
