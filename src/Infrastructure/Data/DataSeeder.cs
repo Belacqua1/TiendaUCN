@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TiendaUCN.src.Domain.Models;
 
-namespace Tienda_UCN_api.src.Infrastructure.Data
+namespace TiendaUCN.src.Infrastructure.Data
 {
     public class DataSeeder
     {

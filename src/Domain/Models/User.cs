@@ -12,5 +12,12 @@ namespace TiendaUCN.src.Domain.Models
         public required DateTime BirthDate { get; set; }
         public DateTime RegisteredAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        
+        /// <summary>
+        /// Indica si el usuario ha aceptado los términos y condiciones.
+        /// </summary>
+        public ICollection<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
+
+        /// <summary>
     }
 }

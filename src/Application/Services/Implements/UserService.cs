@@ -4,6 +4,7 @@ using TiendaUCN.src.Application.DTO.AuthDTO;
 using TiendaUCN.src.Application.DTO.BaseResponse;
 using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
+using TiendaUCN.src.Infrastructure.Repositories.Interfaces;
 
 namespace TiendaUCN.src.Application.Services.Implements
 {
@@ -12,11 +13,19 @@ namespace TiendaUCN.src.Application.Services.Implements
         // Implementation of user registration logic
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
+        private readonly IUserRepository _userRepository;
 
-        public UserService(UserManager<User> userManager, RoleManager<Role> roleManager)
+        public UserService(UserManager<User> userManager, RoleManager<Role> roleManager, IUserRepository userRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _userRepository = userRepository;
+
+        }
+
+        public async Task<int> DeleteUnconfirmedAsync()
+        {
+            return await _userRepository.DeleteUnconfirmedAsync();
         }
 
         public async Task<GenericResponse<string>> RegisterAsync(
