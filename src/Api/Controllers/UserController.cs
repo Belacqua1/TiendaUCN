@@ -90,17 +90,22 @@ namespace TiendaUCN.src.Api.Controllers
         /// <summary>
         /// User login endpoint.
         /// </summary>
-        /// <param name="loginDto">Email, password and rememberMe flag.</param>
-        /// <returns>GenericResponse with JWT and role or error message.</returns>
+        /// <param name="loginDto">Email, password and RememberMe flag.</param>
+        /// <returns>
+        /// GenericResponse with JWT and role if successful,
+        /// or an error message if login fails.
+        /// </returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
         {
+            // Call the AuthService to perform login
             var response = await _authService.LoginAsync(loginDto);
 
+            // Check if response.Data contains a LoginResponseDTO
             if (response.Data is not LoginResponseDTO data)
                 return Unauthorized(new { success = false, message = response.Message });
 
-            // Retornar token y role para que el frontend pueda redirigir según el rol
+            // Return token and role for frontend redirection according to user role
             return Ok(
                 new
                 {
