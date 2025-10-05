@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación de Contraseña</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2d6cdf;
+            font-size: 24px;
+        }
+
+        p {
+            font-size: 16px;
+        }
+
+        .code {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            font-size: 22px;
+            font-weight: bold;
+            background-color: #e0f0ff;
+            color: #2d6cdf;
+            border-radius: 6px;
+            letter-spacing: 2px;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #999;
+            margin-top: 30px;
+        }
+
+        a {
+            color: #2d6cdf;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Recuperación de Contraseña</h1>
+        <p>Hola,</p>
+        <p>Hemos recibido una solicitud para restablecer tu contraseña. Por favor, utiliza el siguiente código para
+            continuar:</p>
+        <div class="code">{{CODE}}</div>
+        <p>Este código expirará en 10 minutos.</p>
+        <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+        <div class="footer">
+            <p>Gracias,<br />El equipo de Tienda UCN</p>
+            <p><a href="https://tiendaucn.example.com">tiendaucn.example.com</a></p>
+        </div>
+    </div>
+</body>
+
+</html>
