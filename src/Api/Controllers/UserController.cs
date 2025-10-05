@@ -75,7 +75,7 @@ namespace TiendaUCN.src.Api.Controllers
         /// Returns a 200 OK if the code is valid.
         /// Returns a 400 BadRequest if the code is invalid or expired.
         /// </returns>
-        [HttpPost("verify-email")]
+        [HttpPost("verify")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyCodeDTO dto)
         {
             // Attempt to verify the code using the verification service
@@ -115,6 +115,26 @@ namespace TiendaUCN.src.Api.Controllers
                     role = data.Role,
                 }
             );
+        }
+
+        [HttpPost("recover-password")]
+        public async Task<IActionResult> RecoverPassword([FromBody] RecoverPasswordDTO dto)
+        {
+            var response = await _userService.RecoverPasswordAsync(dto);
+            if (!response.Success)
+                return BadRequest(new { success = false, message = response.Message });
+
+            return Ok(new { success = true, message = response.Message });
+        }
+
+        [HttpPatch("reset-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordDTO dto)
+        {
+            var response = await _userService.ChangePasswordAsync(dto);
+            if (!response.Success)
+                return BadRequest(new { success = false, message = response.Message });
+
+            return Ok(new { success = true, message = response.Message });
         }
     }
 }
