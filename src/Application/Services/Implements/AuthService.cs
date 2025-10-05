@@ -11,7 +11,7 @@ using TiendaUCN.src.Domain.Models;
 namespace TiendaUCN.src.Application.Services.Implements
 {
     /// <summary>
-    /// Handles user authentication and JWT generation.
+    /// Handles user authentication and JWT token generation.
     /// </summary>
     public class AuthService : IAuthService
     {
@@ -31,14 +31,16 @@ namespace TiendaUCN.src.Application.Services.Implements
         }
 
         /// <summary>
-        /// Authenticates a user and generates a JWT token.
+        /// Login a user, validate credentials, and generate JWT.
         /// </summary>
-        /// <param name="loginDto">Login DTO containing email, password, and RememberMe option.</param>
-        /// <returns>GenericResponse with token and user role if successful, or error message if failed.</returns>
+        /// <param name="loginDto">User email, password, and RememberMe option.</param>
+        /// <returns>GenericResponse with token and role or error message.</returns>
         public async Task<GenericResponse<object>> LoginAsync(LoginDTO loginDto)
         {
+            // Log login attempt
             _logger.LogInformation("[LOGIN] Intento de login para {Email}", loginDto.Email);
 
+            // Find user by email
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
             {
@@ -46,6 +48,7 @@ namespace TiendaUCN.src.Application.Services.Implements
                 return new GenericResponse<object>("Credenciales inválidas");
             }
 
+            // Check password
             var passwordValid = await _userManager.CheckPasswordAsync(user, loginDto.Password);
             if (!passwordValid)
             {
@@ -53,10 +56,11 @@ namespace TiendaUCN.src.Application.Services.Implements
                 return new GenericResponse<object>("Credenciales inválidas");
             }
 
+            // Get user role
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "Cliente";
 
-            // Generar JWT
+            // Generate JWT
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["JWTSecret"]!);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -70,8 +74,8 @@ namespace TiendaUCN.src.Application.Services.Implements
                     }
                 ),
                 Expires = loginDto.RememberMe
-                    ? DateTime.UtcNow.AddHours(24)
-                    : DateTime.UtcNow.AddHours(1),
+                    ? DateTime.UtcNow.AddHours(24) // RememberMe = 24h
+                    : DateTime.UtcNow.AddHours(1), // Default = 1h
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
@@ -80,12 +84,14 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
 
+            // Log successful login
             _logger.LogInformation(
                 "[LOGIN] Inicio de sesión exitoso para {Email} con rol {Role}",
                 loginDto.Email,
                 role
             );
 
+            // Return response
             return new GenericResponse<object>(
                 "Inicio de sesión exitoso",
                 new LoginResponseDTO { Token = token, Role = role }
