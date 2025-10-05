@@ -85,6 +85,7 @@ builder.Services.AddMemoryCache(); // In-memory caching support
 builder.Services.AddScoped<IEmailService, EmailService>(); // Email operations
 builder.Services.AddScoped<IVerificationService, VerificationService>(); // Verification logic
 builder.Services.AddScoped<IUserService, UserService>(); // User management logic
+builder.Services.AddScoped<IAuthService, AuthService>(); // Authentication logic
 #endregion
 
 // Controllers
