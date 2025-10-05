@@ -25,5 +25,7 @@ namespace TiendaUCN.src.Application.Services.Interfaces
             RegisterDTO registerDto,
             string? clientIp = null
         );
+        Task<GenericResponse<string>> RecoverPasswordAsync(RecoverPasswordDTO dto);
+        Task<GenericResponse<string>> ChangePasswordAsync(ResetPasswordDTO dto);
     }
 }
