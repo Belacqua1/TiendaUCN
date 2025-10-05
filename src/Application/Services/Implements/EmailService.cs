@@ -37,7 +37,7 @@ namespace TiendaUCN.src.Application.Services.Implements
         /// <param name="email">Recipient email address.</param>
         /// <param name="code">Verification code to send.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task SendVerificationCodeEmailAsync(string email, string code)
+        public async Task SendVerificationCodeEmailAsync(string email, string code, string nameHtml)
         {
             Console.WriteLine(
                 $"[EMAIL DEBUG] Entrando a SendVerificationCodeEmailAsync para {email}"
@@ -47,7 +47,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             var variables = new Dictionary<string, string> { { "CODE", code } };
 
             // Load HTML template and replace placeholders
-            var htmlBody = await LoadTemplate("VerificationCode", variables);
+            var htmlBody = await LoadTemplate(nameHtml, variables);
 
             // Build the email message
             var message = new EmailMessage
