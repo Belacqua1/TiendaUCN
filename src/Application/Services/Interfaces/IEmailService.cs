@@ -12,7 +12,7 @@ namespace TiendaUCN.src.Application.Services.Interfaces
         /// <param name="email">The recipient's email address.</param>
         /// <param name="code">The verification code to be included in the email.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task SendVerificationCodeEmailAsync(string email, string code);
+        Task SendVerificationCodeEmailAsync(string email, string code, string nameHtml);
 
         /// <summary>
         /// Sends a welcome email to the specified email address.
