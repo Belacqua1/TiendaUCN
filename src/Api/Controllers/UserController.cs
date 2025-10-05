@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TiendaUCN.src.Application.DTO.AuthDTO;
+using TiendaUCN.src.Application.DTO.BaseResponse;
 using TiendaUCN.src.Application.Services.Interfaces;
 
 namespace TiendaUCN.src.Api.Controllers
@@ -14,16 +15,22 @@ namespace TiendaUCN.src.Api.Controllers
     {
         private readonly IUserService _userService;
         private readonly IVerificationService _verificationService;
+        private readonly IAuthService _authService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthController"/> class.
         /// </summary>
         /// <param name="userService">Service to handle user-related operations.</param>
         /// <param name="verificationService">Service to handle email verification logic.</param>
-        public AuthController(IUserService userService, IVerificationService verificationService)
+        public AuthController(
+            IUserService userService,
+            IVerificationService verificationService,
+            IAuthService authService
+        )
         {
             _userService = userService;
             _verificationService = verificationService;
+            _authService = authService;
         }
 
         /// <summary>
@@ -78,6 +85,31 @@ namespace TiendaUCN.src.Api.Controllers
                 return BadRequest(new { message = "Código inválido o expirado." });
 
             return Ok(new { message = "Correo verificado correctamente." });
+        }
+
+        /// <summary>
+        /// User login endpoint.
+        /// </summary>
+        /// <param name="loginDto">Email, password and rememberMe flag.</param>
+        /// <returns>GenericResponse with JWT and role or error message.</returns>
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
+        {
+            var response = await _authService.LoginAsync(loginDto);
+
+            if (response.Data is not LoginResponseDTO data)
+                return Unauthorized(new { success = false, message = response.Message });
+
+            // Retornar token y role para que el frontend pueda redirigir según el rol
+            return Ok(
+                new
+                {
+                    success = true,
+                    message = response.Message,
+                    token = data.Token,
+                    role = data.Role,
+                }
+            );
         }
     }
 }
