@@ -73,6 +73,7 @@ namespace TiendaUCN.src.Application.Services.Implements
                 Gender = registerDto.Gender,
                 BirthDate = registerDto.BirthDate,
                 RegisteredAt = DateTime.Now,
+                PhoneNumber = registerDto.Phone,
                 UpdatedAt = DateTime.Now,
                 EmailConfirmed = false,
             };
