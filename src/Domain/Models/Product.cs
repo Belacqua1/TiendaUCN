@@ -11,9 +11,9 @@ namespace TiendaUCN.src.Domain.Models
         public required string Status { get; set; }
         public bool IsAvailable { get; set; } = true;
         public int CategoryId { get; set; }
-        public required Category Category { get; set; }
+        public Category Category { get; set; }
         public int BrandId { get; set; }
-        public required Brand Brand { get; set; }
+        public Brand Brand { get; set; }
         public ICollection<Image> Images { get; set; } = new List<Image>();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;

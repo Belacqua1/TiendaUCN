@@ -1,11 +1,16 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Resend;
 using Serilog;
 using Tienda_UCN_api.src.Infrastructure.Data;
 using TiendaUCN.src.Application.Services.Implements;
 using TiendaUCN.src.Application.Services.Interfaces;
+using TiendaUCN.src.Domain.Interfaces;
 using TiendaUCN.src.Domain.Models;
+using TiendaUCN.src.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// Entry point of the Tienda UCN API application.
@@ -61,6 +66,33 @@ builder
     .AddDefaultTokenProviders(); // Provides tokens for password reset, email confirmation, etc.
 #endregion
 
+#region JWT Authentication Configuration
+Log.Information("Configurando JWT Authentication");
+builder
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+            ),
+        };
+    });
+
+builder.Services.AddAuthorization(); // Needed for [Authorize] attributes
+#endregion
+
 #region Email Service Configuration
 /// <summary>
 /// Configures the Resend email service for sending verification and welcome emails.
@@ -86,6 +118,8 @@ builder.Services.AddScoped<IEmailService, EmailService>(); // Email operations
 builder.Services.AddScoped<IVerificationService, VerificationService>(); // Verification logic
 builder.Services.AddScoped<IUserService, UserService>(); // User management logic
 builder.Services.AddScoped<IAuthService, AuthService>(); // Authentication logic
+builder.Services.AddScoped<IProductService, ProductService>(); // Product management logic
+builder.Services.AddScoped<IProductRepository, ProductRepository>(); // Product data access
 #endregion
 
 // Controllers
@@ -116,6 +150,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi(); // OpenAPI UI only in development
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers(); // Map API controller endpoints
 app.Run(); // Run the application
