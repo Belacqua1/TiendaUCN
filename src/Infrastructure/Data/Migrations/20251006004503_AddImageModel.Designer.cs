@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
+using TiendaUCN.src.Infrastructure.Data;
 
 #nullable disable
 
-namespace TiendaUCN.Migrations
+namespace TiendaUCN.src.Infrastructure.Data.Migrations
 {
-    [DbContext(typeof(TiendaUCN.src.Infrastructure.Data.DataContext))]
-    [Migration("20250930045351_InitialCreate")]
-    partial class InitialCreate
+    [DbContext(typeof(DataContext))]
+    [Migration("20251006004503_AddImageModel")]
+    partial class AddImageModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -168,11 +168,12 @@ namespace TiendaUCN.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PublicId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -349,6 +350,38 @@ namespace TiendaUCN.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("TiendaUCN.src.Domain.Models.VerificationCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CodeType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("VerificationCodes");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("TiendaUCN.src.Domain.Models.Role", null)
@@ -404,7 +437,9 @@ namespace TiendaUCN.Migrations
                 {
                     b.HasOne("TiendaUCN.src.Domain.Models.Product", null)
                         .WithMany("Images")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TiendaUCN.src.Domain.Models.Product", b =>
@@ -426,9 +461,23 @@ namespace TiendaUCN.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("TiendaUCN.src.Domain.Models.VerificationCode", b =>
+                {
+                    b.HasOne("TiendaUCN.src.Domain.Models.User", null)
+                        .WithMany("VerificationCodes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TiendaUCN.src.Domain.Models.Product", b =>
                 {
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("TiendaUCN.src.Domain.Models.User", b =>
+                {
+                    b.Navigation("VerificationCodes");
                 });
 #pragma warning restore 612, 618
         }
