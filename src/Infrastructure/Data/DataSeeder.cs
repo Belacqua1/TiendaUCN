@@ -29,7 +29,7 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
                 await context.Database.MigrateAsync();
                 var genders =
-                    configuration.GetSection("User:Gender").Get<string[]>()
+                    configuration.GetSection("Genders").Get<string[]>()
                     ?? throw new InvalidOperationException(
                         "La configuración de genero no está completa"
                     );
