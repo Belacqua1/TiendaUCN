@@ -8,7 +8,7 @@ using TiendaUCN.src.Domain.Models;
 namespace TiendaUCN.src.Application.Services.Implements
 {
     /// <summary>
-    /// Service implents for token generation and management.
+    /// Service implements for token generation and management.
     /// </summary>
     public class TokenService : ITokenService
     {
