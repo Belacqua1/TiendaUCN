@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TiendaUCN.src.Application.DTO.AuthDTO;
 using TiendaUCN.src.Application.DTO.BaseResponse;
+using TiendaUCN.src.Application.DTO.UserDTO;
 using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
 
@@ -174,6 +176,45 @@ namespace TiendaUCN.src.Application.Services.Implements
             return new GenericResponse<string>(
                 message: "Contraseña cambiada correctamente.",
                 data: null
+            );
+        }
+
+        public async Task<GenericResponse<UserProfileDto>> GetUserProfileAsync(int userId)
+        {
+            // Retrieve user using ASP.NET Identity
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                Log.Warning("Profile request failed: user {UserId} not found", userId);
+                return new GenericResponse<UserProfileDto>(
+                    message: "Usuario no encontrado.",
+                    data: null,
+                    success: false
+                );
+            }
+
+            // Map User entity to DTO to avoid leaking sensitive data
+            var profile = new UserProfileDto
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Gender = user.Gender,
+                BirthDate = user.BirthDate,
+                Rut = user.Rut,
+                Email = user.Email ?? string.Empty,
+            };
+
+            // Log profile access event
+            Log.Information(
+                "User {UserId} accessed their profile at {Timestamp}",
+                user.Id,
+                DateTime.UtcNow
+            );
+
+            return new GenericResponse<UserProfileDto>(
+                message: "Usuario encontrado exitosamente.",
+                data: profile,
+                success: true
             );
         }
     }
