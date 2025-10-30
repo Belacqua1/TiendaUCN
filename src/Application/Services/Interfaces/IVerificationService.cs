@@ -11,7 +11,7 @@ namespace TiendaUCN.src.Application.Services.Interfaces
         /// </summary>
         /// <param name="email">The email address to send the verification code to.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        Task GenerateAndSendCodeAsync(string email, string nameHtml);
+        Task GenerateAndSendCodeAsync(string email, string nameHtml, bool isPendingEmail = false);
 
         /// <summary>
         /// Validates a given verification code for a specific email address.
@@ -23,5 +23,6 @@ namespace TiendaUCN.src.Application.Services.Interfaces
         /// </returns>
         Task<bool> VerifyCodeAsync(string email, string code);
         Task<bool> VerifyCodeRecoverAsync(string email, string code);
+        Task<bool> VerifyPendingEmailAsync(string email, string code);
     }
 }
