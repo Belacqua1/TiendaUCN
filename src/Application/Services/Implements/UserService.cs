@@ -202,6 +202,7 @@ namespace TiendaUCN.src.Application.Services.Implements
                 BirthDate = user.BirthDate,
                 Rut = user.Rut,
                 Email = user.Email ?? string.Empty,
+                Phone = user.PhoneNumber ?? string.Empty,
             };
 
             // Log profile access event
