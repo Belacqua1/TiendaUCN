@@ -218,5 +218,146 @@ namespace TiendaUCN.src.Application.Services.Implements
                 success: true
             );
         }
+
+        public async Task<GenericResponse<string>> UpdateProfileAsync(
+            int userId,
+            UpdateProfileDTO dto
+        )
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                Log.Warning(
+                    "Intento de actualización fallido: usuario {UserId} no encontrado",
+                    userId
+                );
+                return new GenericResponse<string>("Usuario no encontrado.", null, false);
+            }
+
+            bool modified = false;
+
+            // Validar y actualizar nombre
+            if (!string.IsNullOrWhiteSpace(dto.FirstName))
+            {
+                user.FirstName = dto.FirstName.Trim();
+                modified = true;
+            }
+
+            // Validar y actualizar apellido
+            if (!string.IsNullOrWhiteSpace(dto.LastName))
+            {
+                user.LastName = dto.LastName.Trim();
+                modified = true;
+            }
+
+            // Validar género
+            if (!string.IsNullOrWhiteSpace(dto.Gender))
+            {
+                var validGenders = new[] { "Masculino", "Femenino", "Otro" };
+                if (!validGenders.Contains(dto.Gender))
+                    return new GenericResponse<string>("Género inválido.", null, false);
+
+                user.Gender = dto.Gender;
+                modified = true;
+            }
+
+            // Validar fecha de nacimiento
+            if (dto.BirthDate.HasValue)
+            {
+                user.BirthDate = dto.BirthDate.Value;
+                modified = true;
+            }
+
+            // Validar y actualizar RUT
+            if (!string.IsNullOrWhiteSpace(dto.Rut))
+            {
+                var existingRut = await _userManager.Users.AnyAsync(u =>
+                    u.Rut == dto.Rut && u.Id != userId
+                );
+                if (existingRut)
+                    return new GenericResponse<string>("El RUT ya está registrado.", null, false);
+
+                user.Rut = dto.Rut;
+                modified = true;
+            }
+
+            // Validar y actualizar email
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+            {
+                var existingEmail = await _userManager.Users.AnyAsync(u =>
+                    u.Email == dto.Email && u.Id != userId
+                );
+                if (existingEmail)
+                    return new GenericResponse<string>(
+                        "El correo ya está registrado.",
+                        null,
+                        false
+                    );
+
+                if (dto.Email != user.Email)
+                {
+                    user.EmailConfirmed = false;
+                    user.Email = dto.Email;
+                    user.UserName = dto.Email;
+                    await _verificationService.GenerateAndSendCodeAsync(
+                        user.Email,
+                        nameHtml: "VerificationCode"
+                    );
+                    Log.Information(
+                        "Se envió código de verificación para cambio de correo a {Email}",
+                        dto.Email
+                    );
+                }
+
+                modified = true;
+            }
+
+            // Validar y actualizar teléfono
+            if (!string.IsNullOrWhiteSpace(dto.Phone))
+            {
+                user.PhoneNumber = dto.Phone;
+                modified = true;
+            }
+
+            if (!modified)
+                return new GenericResponse<string>(
+                    "No se enviaron campos válidos para actualizar.",
+                    null,
+                    false
+                );
+
+            user.UpdatedAt = DateTime.UtcNow;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                Log.Error(
+                    "Error al actualizar perfil de usuario {UserId}: {Errors}",
+                    userId,
+                    errors
+                );
+                return new GenericResponse<string>(
+                    $"Error al actualizar perfil: {errors}",
+                    null,
+                    false
+                );
+            }
+
+            Log.Information(
+                "Usuario {UserId} actualizó su perfil el {Date}. Campos modificados: {Fields}",
+                userId,
+                DateTime.Now,
+                string.Join(
+                    ", ",
+                    typeof(UpdateProfileDTO)
+                        .GetProperties()
+                        .Where(p => p.GetValue(dto) != null)
+                        .Select(p => p.Name)
+                )
+            );
+
+            return new GenericResponse<string>("Perfil actualizado exitosamente.", null, true);
+        }
     }
 }
