@@ -1,5 +1,8 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Resend;
 using Serilog;
 using Tienda_UCN_api.src.Infrastructure.Data;
@@ -61,6 +64,33 @@ builder
     .AddDefaultTokenProviders(); // Provides tokens for password reset, email confirmation, etc.
 #endregion
 
+#region JWT Authentication Configuration
+/// <summary>
+/// Configures JWT Bearer authentication for API endpoints.
+/// </summary>
+builder
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            ),
+        };
+    });
+#endregion
+
 #region Email Service Configuration
 /// <summary>
 /// Configures the Resend email service for sending verification and welcome emails.
@@ -116,7 +146,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi(); // OpenAPI UI only in development
 }
-
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers(); // Map API controller endpoints
 app.Run(); // Run the application
 #endregion
