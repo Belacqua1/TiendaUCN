@@ -68,12 +68,12 @@ namespace TiendaUCN.src.Application.DTO.AuthDTO
 
         /// <summary>
         /// Gets or sets the user's phone number.
-        /// Must be a valid Chilean phone number format.
+        /// Must be in Chilean format: +569XXXXXXXX.
         /// </summary>
         [Required(ErrorMessage = "El teléfono es obligatorio.")]
         [RegularExpression(
-            @"^(\+?56)?0?(?:[2-9]\d{7})$",
-            ErrorMessage = "El teléfono debe tener formato chileno válido."
+            @"^\+569\d{8}$",
+            ErrorMessage = "El teléfono debe tener el formato chileno válido: +569XXXXXXXX."
         )]
         public string Phone { get; set; } = string.Empty;
 
