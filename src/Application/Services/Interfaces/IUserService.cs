@@ -28,8 +28,9 @@ namespace TiendaUCN.src.Application.Services.Interfaces
             string? clientIp = null
         );
         Task<GenericResponse<string>> RecoverPasswordAsync(RecoverPasswordDTO dto);
-        Task<GenericResponse<string>> ChangePasswordAsync(ResetPasswordDTO dto);
+        Task<GenericResponse<string>> ResetPasswordAsync(ResetPasswordDTO dto);
         Task<GenericResponse<UserProfileDto>> GetUserProfileAsync(int userId);
         Task<GenericResponse<string>> UpdateProfileAsync(int userId, UpdateProfileDTO dto);
+        Task<GenericResponse<string>> ChangePasswordAsync(string email, ChangePasswordDTO dto);
     }
 }
