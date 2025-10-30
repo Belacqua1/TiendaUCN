@@ -142,7 +142,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             );
         }
 
-        public async Task<GenericResponse<string>> ChangePasswordAsync(ResetPasswordDTO dto)
+        public async Task<GenericResponse<string>> ResetPasswordAsync(ResetPasswordDTO dto)
         {
             var isCodeValid = await _verificationService.VerifyCodeRecoverAsync(
                 dto.Email,
@@ -358,6 +358,48 @@ namespace TiendaUCN.src.Application.Services.Implements
             );
 
             return new GenericResponse<string>("Perfil actualizado exitosamente.", null, true);
+        }
+
+        public async Task<GenericResponse<string>> ChangePasswordAsync(
+            String email,
+            ChangePasswordDTO dto
+        )
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return new GenericResponse<string>(message: "Usuario no encontrado.", data: null);
+
+            var isOldPasswordValid = await _userManager.CheckPasswordAsync(
+                user,
+                dto.CurrentPassword
+            );
+            if (!isOldPasswordValid)
+            {
+                return new GenericResponse<string>(
+                    message: "La contraseña actual es incorrecta.",
+                    data: null
+                );
+            }
+
+            var result = await _userManager.ChangePasswordAsync(
+                user,
+                dto.CurrentPassword,
+                dto.NewPassword
+            );
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return new GenericResponse<string>(
+                    message: $"No se pudo cambiar la contraseña: {errors}",
+                    data: null
+                );
+            }
+
+            return new GenericResponse<string>(
+                message: "Contraseña cambiada correctamente.",
+                data: null
+            );
         }
     }
 }
