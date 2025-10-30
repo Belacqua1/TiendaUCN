@@ -54,8 +54,8 @@ namespace TiendaUCN.src.Application.Services.Implements
             {
                 To = email,
 
-                Subject = _configuration["EmailConfiguration:VerificationSubject"],
-                From = _configuration["EmailConfiguration:From"],
+                Subject = _configuration["EmailConfiguration:VerificationSubject"]!,
+                From = _configuration["EmailConfiguration:From"]!,
                 HtmlBody = htmlBody,
             };
 
