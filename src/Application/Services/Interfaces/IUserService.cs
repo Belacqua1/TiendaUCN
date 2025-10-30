@@ -1,5 +1,7 @@
 using TiendaUCN.src.Application.DTO.AuthDTO;
 using TiendaUCN.src.Application.DTO.BaseResponse;
+using TiendaUCN.src.Application.DTO.UserDTO;
+using TiendaUCN.src.Domain.Models;
 
 namespace TiendaUCN.src.Application.Services.Interfaces
 {
@@ -27,5 +29,6 @@ namespace TiendaUCN.src.Application.Services.Interfaces
         );
         Task<GenericResponse<string>> RecoverPasswordAsync(RecoverPasswordDTO dto);
         Task<GenericResponse<string>> ChangePasswordAsync(ResetPasswordDTO dto);
+        Task<GenericResponse<UserProfileDto>> GetUserProfileAsync(int userId);
     }
 }
