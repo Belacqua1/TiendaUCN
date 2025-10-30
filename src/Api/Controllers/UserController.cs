@@ -45,36 +45,36 @@ namespace TiendaUCN.src.Api.Controllers
 
             return Ok(new { success = true, data = response.Data });
         }
-
         /*
-        /// <summary>
-        /// Updates user profile data (PUT /api/user/profile)
-        /// </summary>
-        [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _userService.UpdateProfileAsync(int.Parse(userId), dto);
-            return response.Success
-                ? Ok(new { success = true, message = response.Message })
-                : BadRequest(new { success = false, message = response.Message });
-        }
-
-        /// <summary>
-        /// Changes user password (PATCH /api/user/change-password)
-        /// </summary>
-        [HttpPatch("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _userService.ChangePasswordAuthenticatedAsync(
-                int.Parse(userId),
-                dto
-            );
-            return response.Success
-                ? Ok(new { success = true, message = response.Message })
-                : BadRequest(new { success = false, message = response.Message });
-        }
-        */
+                /// <summary>
+                /// Updates user profile data (PUT /api/user/profile)
+                /// </summary>
+                [HttpPut("profile")]
+                public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var response = await _userService.UpdateProfileAsync(int.Parse(userId), dto);
+                    return response.Success
+                        ? Ok(new { success = true, message = response.Message })
+                        : BadRequest(new { success = false, message = response.Message });
+                }
+        
+                
+                /// <summary>
+                /// Changes user password (PATCH /api/user/change-password)
+                /// </summary>
+                [HttpPatch("change-password")]
+                public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var response = await _userService.ChangePasswordAuthenticatedAsync(
+                        int.Parse(userId),
+                        dto
+                    );
+                    return response.Success
+                        ? Ok(new { success = true, message = response.Message })
+                        : BadRequest(new { success = false, message = response.Message });
+                }
+                */
     }
 }
