@@ -130,9 +130,9 @@ namespace TiendaUCN.src.Api.Controllers
         }
 
         [HttpPatch("reset-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordDTO dto)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
         {
-            var response = await _userService.ChangePasswordAsync(dto);
+            var response = await _userService.ResetPasswordAsync(dto);
             if (!response.Success)
                 return BadRequest(new { success = false, message = response.Message });
 
