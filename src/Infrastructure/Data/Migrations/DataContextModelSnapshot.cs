@@ -307,6 +307,9 @@ namespace TiendaUCN.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PendingEmail")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("TEXT");
 
@@ -331,6 +334,12 @@ namespace TiendaUCN.Migrations
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VerificationCode")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("VerificationCodeExpires")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
