@@ -62,7 +62,11 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             // Generate JWT
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["JWTSecret"]!);
+            var keyString = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(keyString))
+                throw new Exception("JWT key no configurada en appsettings.json");
+
+            var key = Encoding.UTF8.GetBytes(keyString);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(
@@ -76,6 +80,8 @@ namespace TiendaUCN.src.Application.Services.Implements
                 Expires = loginDto.RememberMe
                     ? DateTime.UtcNow.AddHours(24) // RememberMe = 24h
                     : DateTime.UtcNow.AddHours(1), // Default = 1h
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
