@@ -2,8 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Application.DTO.UserDTO;
+using TiendaUCN.src.Application.Services.Interfaces;
 
 namespace TiendaUCN.src.Api.Controllers
 {
@@ -17,10 +17,12 @@ namespace TiendaUCN.src.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IVerificationService _verificationService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IVerificationService verificationService)
         {
             _userService = userService;
+            _verificationService = verificationService;
         }
 
         /// <summary>
@@ -53,11 +55,55 @@ namespace TiendaUCN.src.Api.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDTO dto)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _userService.UpdateProfileAsync(int.Parse(userId), dto);
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // y el warning si el Claim no existiera o no fuera un número.
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                // El token es inválido o no contiene un ID de usuario válido.
+                return Unauthorized(
+                    new
+                    {
+                        success = false,
+                        message = "Token inválido o ID de usuario no encontrado.",
+                    }
+                );
+            }
+
+            // Aquí sabes que 'userId' es un entero válido (ej: 101)
+            var response = await _userService.UpdateProfileAsync(userId, dto);
+
             return response.Success
                 ? Ok(new { success = true, message = response.Message })
                 : BadRequest(new { success = false, message = response.Message });
+        }
+
+        /// <summary>
+        /// Verifies a pending email change by checking the provided verification code.
+        /// </summary>
+        [HttpPost("verify-code-email")]
+        public async Task<IActionResult> VerifyCodeEmail([FromBody] VerifyCodeEmail dto)
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Unauthorized(
+                    new
+                    {
+                        success = false,
+                        message = "No se pudo obtener el correo del usuario autenticado.",
+                    }
+                );
+            }
+            var isValid = await _verificationService.VerifyPendingEmailAsync(userEmail, dto.Code);
+            if (!isValid)
+            {
+                return BadRequest(
+                    new { success = false, message = "Código de verificación inválido o expirado." }
+                );
+            }
+
+            return Ok(new { success = true, message = "Código de verificación válido." });
         }
 
         /*
