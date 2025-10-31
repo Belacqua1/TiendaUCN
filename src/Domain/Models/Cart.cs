@@ -42,5 +42,4 @@ namespace TiendaUCN.src.Domain.Models
         /// </summary>
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
-
 }
