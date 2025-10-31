@@ -1,6 +1,9 @@
 using System.Text;
+using Hangfire;
+using Hangfire.Storage.SQLite;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Resend;
@@ -15,6 +18,11 @@ using TiendaUCN.src.Domain.Models;
 /// Configures services, database, identity, email service, and the HTTP request pipeline.
 /// </summary>
 var builder = WebApplication.CreateBuilder(args);
+var connectionStrings =
+    builder.Configuration.GetConnectionString("SqliteDatabase")
+    ?? throw new InvalidOperationException(
+        "La cadena de conexion a la base de datos no esta configurada"
+    );
 
 #region OpenAPI Configuration
 /// <summary>
@@ -40,9 +48,32 @@ builder.Host.UseSerilog(
 /// The connection string is read from appsettings.json.
 /// </summary>
 Log.Information("Configurando base de datos SQLite");
-builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("SqliteDatabase"))
-);
+builder.Services.AddDbContext<DataContext>(options => options.UseSqlite(connectionStrings));
+#endregion
+
+#region Hanfirer Configuration
+Log.Information("Configurando los trabajos de segundo plano de Hanfire");
+var cronExpression =
+    builder.Configuration["Jobs:CronJobDeleteUnconfirmedUsers"]
+    ?? throw new InvalidOperationException("La exprecion cron no esta configurada");
+#pragma warning disable CS8604 // Possible null reference argument.
+var timeZone =
+    TimeZoneInfo.FindSystemTimeZoneById(builder.Configuration["Jobs:TimeZone"])
+    ?? throw new InvalidOperationException("La zona horaria para los trabajos no esta configurada");
+
+// Default to daily at midnight if not set
+builder.Services.AddHangfire(configuration =>
+{
+    var connectionStringBuilder = new SqliteConnectionStringBuilder(connectionStrings);
+    var databasePath = connectionStringBuilder.DataSource;
+
+    configuration.UseSQLiteStorage(databasePath);
+    configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
+    configuration.UseSimpleAssemblyNameTypeSerializer();
+    configuration.UseRecommendedSerializerSettings();
+});
+builder.Services.AddHangfireServer();
+#pragma warning restore CS8604 // Possible null reference argument.
 #endregion
 
 #region Identity Configuration
@@ -125,6 +156,35 @@ builder.Services.AddScoped<IAuthService, AuthService>(); // Authentication logic
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+// Hangfire Dashboard
+
+app.UseHangfireDashboard(
+    builder.Configuration["HangfireDashboard:DashboardPath"]
+        ?? throw new InvalidOperationException(
+            "La ruta del dashboard de Hangfire no esta configurado"
+        ),
+    new DashboardOptions
+    {
+        StatsPollingInterval =
+            builder.Configuration.GetValue<int?>("HangfireDashboard:StatsPollingInterval")
+            ?? throw new InvalidOperationException(
+                "El intervalo de actualización de estadísticas del panel de control de Hangfire no está configurado."
+            ),
+        DashboardTitle =
+            builder.Configuration["HangfireDashboard:DashboardTitle"]
+            ?? throw new InvalidOperationException(
+                "El título del panel de control de Hangfire no está configurado."
+            ),
+        DisplayStorageConnectionString =
+            builder.Configuration.GetValue<bool?>(
+                "HangfireDashboard:DisplayStorageConnectionString"
+            )
+            ?? throw new InvalidOperationException(
+                "La configuración 'HangfireDashboard:DisplayStorageConnectionString' no está definida."
+            ),
+    }
+);
 
 #region Database Seeder
 /// <summary>
