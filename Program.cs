@@ -1,5 +1,6 @@
 using System.Text;
 using Hangfire;
+using TiendaUCN.src.Application.Jobs.Interface;
 using Hangfire.Storage.SQLite;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -186,7 +187,7 @@ app.UseHangfireDashboard(
     }
 );
 
-#region Database Seeder
+#region Database Seeder and Jobs Setup
 /// <summary>
 /// Applies database migrations and seeds initial data.
 /// </summary>
@@ -194,6 +195,19 @@ Log.Information("Aplicando migraciones a la base de datos");
 using (var scope = app.Services.CreateScope())
 {
     await DataSeeder.Initialize(scope.ServiceProvider);
+    var jobId = nameof(UserJob.DeleteUnconfirmedAsync);
+    RecurringJob.AddOrUpdate<IUserJob>(
+        jobId,
+        job => job.DeleteUnconfirmedAsync(),
+        cronExpression,
+        new RecurringJobOptions { TimeZone = timeZone }
+    );
+    Log.Information(
+        "Trabajo recurrente '{JobId}' configurado con expresión CRON '{CronExpression}' en zona horaria '{TimeZone}'",
+        jobId,
+        cronExpression,
+        timeZone.Id
+    );
 }
 #endregion
 

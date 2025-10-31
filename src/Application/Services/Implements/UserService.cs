@@ -359,5 +359,38 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             return new GenericResponse<string>("Perfil actualizado exitosamente.", null, true);
         }
+        public async Task<int> DeleteUnconfirmedUsersAsync()
+        {
+            var cutoffDate = DateTime.UtcNow.AddDays(-7);
+            var unconfirmedUsers = await _userManager.Users
+                .Where(u => !u.EmailConfirmed && u.RegisteredAt < cutoffDate)
+                .ToListAsync();
+
+            int deletedCount = 0;
+
+            foreach (var user in unconfirmedUsers)
+            {
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    deletedCount++;
+                    Log.Information(
+                        "Usuario no confirmado {UserId} eliminado automáticamente.",
+                        user.Id
+                    );
+                }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    Log.Error(
+                        "Error al eliminar usuario no confirmado {UserId}: {Errors}",
+                        user.Id,
+                        errors
+                    );
+                }
+            }
+
+            return deletedCount;
+        }
     }
 }

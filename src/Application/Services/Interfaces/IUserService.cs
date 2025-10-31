@@ -31,5 +31,6 @@ namespace TiendaUCN.src.Application.Services.Interfaces
         Task<GenericResponse<string>> ChangePasswordAsync(ResetPasswordDTO dto);
         Task<GenericResponse<UserProfileDto>> GetUserProfileAsync(int userId);
         Task<GenericResponse<string>> UpdateProfileAsync(int userId, UpdateProfileDTO dto);
+        Task<int> DeleteUnconfirmedUsersAsync();
     }
 }
