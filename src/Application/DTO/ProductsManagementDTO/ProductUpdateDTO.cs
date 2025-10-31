@@ -5,7 +5,7 @@ namespace TiendaUCN.src.Application.DTO.ProductsManagementDTO
     /// <summary>
     /// DTO for user login input data.
     /// </summary>
-    public class ProductUpdateDto
+    public class ProductUpdateDTO
     {
         [Required]
         [StringLength(100, MinimumLength = 2)]

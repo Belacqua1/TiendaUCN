@@ -21,11 +21,11 @@ namespace TiendaUCN.src.Api.Controllers.Admin
         // --- Sub-flujo 6.1: CRUD ---
 
         [HttpPost]
-        [ProducesResponseType(typeof(ProductAdminResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProductAdminResponseDTO), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDto createDto)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDTO createDto)
         {
             // R82: Validaciones (automáticas por DataAnnotations, pero faltan las de dominio)
             // R89: Validar existencia de brandId/categoryId
@@ -44,7 +44,10 @@ namespace TiendaUCN.src.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] ProductUpdateDto updateDto)
+        public async Task<IActionResult> UpdateProduct(
+            Guid id,
+            [FromBody] ProductUpdateDTO updateDto
+        )
         {
             // R84: Lógica para buscar el producto (404 si no existe)
             // R82: Validaciones
@@ -79,7 +82,10 @@ namespace TiendaUCN.src.Api.Controllers.Admin
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)] // R86: Debería ser un objeto de paginación
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> GetProducts([FromQuery] /* PagingParams */ object queryParams)
+        public async Task<IActionResult> GetProducts(
+            [FromQuery] /* PagingParams */
+            object queryParams
+        )
         {
             // R86: Listado interno (con paginación, filtros, etc.)
             // Importante: Este listado SÍ debe poder incluir inactivos/eliminados si se pide.
@@ -91,7 +97,7 @@ namespace TiendaUCN.src.Api.Controllers.Admin
         }
 
         [HttpGet("{id:guid}", Name = "GetProductById")] // Asignamos un nombre para el CreatedAtAction
-        [ProducesResponseType(typeof(ProductAdminResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProductAdminResponseDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

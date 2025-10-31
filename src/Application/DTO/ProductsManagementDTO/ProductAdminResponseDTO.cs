@@ -5,7 +5,7 @@ namespace TiendaUCN.src.Application.DTO.ProductsManagementDTO
     /// <summary>
     /// DTO for creating a new product.
     /// </summary>
-    public class ProductAdminResponseDto
+    public class ProductAdminResponseDTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
