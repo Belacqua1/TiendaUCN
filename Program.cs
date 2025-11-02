@@ -154,6 +154,7 @@ builder.Services.AddScoped<IPublicProductService, PublicProductService>(); // Pu
 builder.Services.AddScoped<IProductAdminService, ProductAdminService>(); // Admin product management logic
 builder.Services.AddScoped<ICategoryAdminService, CategoryAdminService>(); // Admin category management logic
 builder.Services.AddScoped<IUserAdminService, UserAdminService>(); // Admin user management logic
+builder.Services.AddScoped<IOrderAdminService, OrderAdminService>(); // Admin order management logic
 #endregion
 
 #region Application Repositories
