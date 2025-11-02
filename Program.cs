@@ -153,6 +153,7 @@ builder.Services.AddScoped<IImageService, ImageService>(); // Image management l
 builder.Services.AddScoped<IPublicProductService, PublicProductService>(); // Public product catalog logic
 builder.Services.AddScoped<IProductAdminService, ProductAdminService>(); // Admin product management logic
 builder.Services.AddScoped<ICategoryAdminService, CategoryAdminService>(); // Admin category management logic
+builder.Services.AddScoped<IUserAdminService, UserAdminService>(); // Admin user management logic
 #endregion
 
 #region Application Repositories

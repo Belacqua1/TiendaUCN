@@ -10,7 +10,7 @@ namespace TiendaUCN.src.Domain.Models
         public required string LastName { get; set; }
         public required string Gender { get; set; }
         public required DateTime BirthDate { get; set; }
-
+        public DateTime? LastLoginDate { get; set; }
         public DateTime RegisteredAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public string? PendingEmail { get; set; }
