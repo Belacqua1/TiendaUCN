@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TiendaUCN.src.Application.DTO.ProductsManagementDTO; // Asegúrate de importar tus DTOs
+using TiendaUCN.src.Application.DTO;
+using TiendaUCN.src.Application.DTO.AdminDTO;
+using TiendaUCN.src.Application.DTO.BaseResponse;
+using TiendaUCN.src.Application.DTO.Public;
+using TiendaUCN.src.Application.Services.Interfaces;
 
 namespace TiendaUCN.src.Api.Controllers.Admin
 {
@@ -8,119 +12,167 @@ namespace TiendaUCN.src.Api.Controllers.Admin
     [Route("api/admin/products")]
     [Authorize(Roles = "Admin")] // R80: Protegido por rol de Administrador
     [Produces("application/json")]
-    [Consumes("application/json")]
     public class AdminProductsController : ControllerBase
     {
-        // Aquí inyectarás tus servicios y DbContext
-        // private readonly IProductAdminService _productService;
-        // public AdminProductsController(IProductAdminService productService)
-        // {
-        //    _productService = productService;
-        // }
+        private readonly IProductAdminService _productAdminService;
+        private readonly IImageService _imageService;
+
+        public AdminProductsController(
+            IProductAdminService productAdminService,
+            IImageService imageService
+        )
+        {
+            _productAdminService = productAdminService;
+            _imageService = imageService;
+        }
 
         // --- Sub-flujo 6.1: CRUD ---
 
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(typeof(ProductAdminResponseDTO), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDTO createDto)
         {
-            // R82: Validaciones (automáticas por DataAnnotations, pero faltan las de dominio)
-            // R89: Validar existencia de brandId/categoryId
-            // R83: Lógica para crear, setear IsActive=true, IsDeleted=false, CreatedAtUtc
-            // ...
-            // R83: Devolver 201 Created con el DTO de respuesta
-            // var productDto = await _productService.CreateAsync(createDto);
-            // return CreatedAtAction(nameof(GetProductById), new { id = productDto.Id }, productDto);
-
-            return Ok("TODO: Implementar POST"); // Placeholder
+            try
+            {
+                var productDto = await _productAdminService.CreateAsync(createDto);
+                return CreatedAtAction(
+                    nameof(GetProductById),
+                    new { id = productDto.Id },
+                    productDto
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        [HttpPut("{id:guid}")]
+        [HttpPut("{id:int}")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProduct(
-            Guid id,
+            int id,
             [FromBody] ProductUpdateDTO updateDto
         )
         {
-            // R84: Lógica para buscar el producto (404 si no existe)
-            // R82: Validaciones
-            // R84: Actualizar campos, NO actualizar Id, CreatedAtUtc. Setear UpdatedAtUtc.
-            // ...
-            // await _productService.UpdateAsync(id, updateDto);
-            // return NoContent(); // R84: 200/204 coherente
-
-            return Ok("TODO: Implementar PUT"); // Placeholder
+            var success = await _productAdminService.UpdateAsync(id, updateDto);
+            if (!success)
+            {
+                return NotFound(new { message = "Producto no encontrado." });
+            }
+            return NoContent();
         }
 
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteProduct(Guid id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            // R85: Eliminación Lógica (Soft Delete)
-            // Buscar producto (404 si no existe)
-            // NO BORRAR FÍSICAMENTE
-            // Settear: product.IsDeleted = true; product.DeletedAtUtc = DateTime.UtcNow;
-            // Guardar cambios
-            // ...
-            // await _productService.SoftDeleteAsync(id);
-            // return NoContent(); // R85: 200/204 coherente
-
-            return Ok("TODO: Implementar DELETE"); // Placeholder
+            var success = await _productAdminService.SoftDeleteAsync(id);
+            if (!success)
+            {
+                return NotFound(new { message = "Producto no encontrado." });
+            }
+            return NoContent();
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)] // R86: Debería ser un objeto de paginación
+        [ProducesResponseType(
+            typeof(PagedResponse<ProductAdminResponseDTO>),
+            StatusCodes.Status200OK
+        )]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> GetProducts(
-            [FromQuery] /* PagingParams */
-            object queryParams
-        )
+        public async Task<IActionResult> GetProducts([FromQuery] ProductQueryParams queryParams)
         {
-            // R86: Listado interno (con paginación, filtros, etc.)
-            // Importante: Este listado SÍ debe poder incluir inactivos/eliminados si se pide.
-            // ...
-            // var pagedResult = await _productService.GetAllAdminAsync(queryParams);
-            // return Ok(pagedResult);
-
-            return Ok("TODO: Implementar GET (Listado)"); // Placeholder
+            var pagedResult = await _productAdminService.GetAllAdminAsync(queryParams);
+            return Ok(pagedResult);
         }
 
-        [HttpGet("{id:guid}", Name = "GetProductById")] // Asignamos un nombre para el CreatedAtAction
+        [HttpGet("{id:int}", Name = "GetProductById")]
         [ProducesResponseType(typeof(ProductAdminResponseDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetProductById(Guid id)
+        public async Task<IActionResult> GetProductById(int id)
         {
-            // R87: Detalle interno
-            // Buscar producto (incluyendo inactivos/eliminados)
-            // 404 si no existe
-            // Mapear a ProductAdminResponseDto (incluyendo IsActive, IsDeleted, etc.)
-            // ...
-            // var productDto = await _productService.GetByIdAdminAsync(id);
-            // if (productDto == null) return NotFound();
-            // return Ok(productDto);
-
-            return Ok("TODO: Implementar GET (Detalle)"); // Placeholder
+            var productDto = await _productAdminService.GetByIdAdminAsync(id);
+            if (productDto == null)
+            {
+                return NotFound(new { message = "Producto no encontrado." });
+            }
+            return Ok(productDto);
         }
 
-        // --- Sub-flujo 6.2: Imágenes (Pendiente) ---
-        // POST {id}/images
-        // DELETE {id}/images/{imageId}
+        // --- Sub-flujo 6.2: Imágenes ---
 
-        // --- Sub-flujo 6.3: Estado y Descuento (Pendiente) ---
-        // PATCH {id}/discount
-        // PATCH {id}/status
+        [HttpPost("{id:int}/images")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadImage(int id, IFormFile file)
+        {
+            try
+            {
+                var success = await _imageService.UploadImageAsync(file, id);
+                if (!success)
+                {
+                    return BadRequest(new { message = "No se pudo subir la imagen." });
+                }
+                return Ok(new { message = "Imagen subida correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id:int}/images/{publicId}")]
+        public async Task<IActionResult> DeleteImage(int id, string publicId)
+        {
+            // El 'id' del producto no se usa en la lógica de borrado de imagen, pero es bueno para la estructura del endpoint.
+            var success = await _imageService.DeleteImageAsync(publicId);
+            if (!success)
+            {
+                return NotFound(new { message = "Imagen no encontrada." });
+            }
+            return NoContent();
+        }
+
+        // --- Sub-flujo 6.3: Estado y Descuento ---
+
+        [HttpPatch("{id:int}/status")]
+        [Consumes("application/json")]
+        public async Task<IActionResult> UpdateProductStatus(
+            int id,
+            [FromBody] ProductStatusUpdateDTO statusDto
+        )
+        {
+            var success = await _productAdminService.UpdateStatusAsync(id, statusDto.IsAvailable);
+            if (!success)
+                return NotFound(new { message = "Producto no encontrado o ya está eliminado." });
+            return NoContent();
+        }
+
+        [HttpPatch("{id:int}/discount")]
+        [Consumes("application/json")]
+        public async Task<IActionResult> UpdateProductDiscount(
+            int id,
+            [FromBody] ProductDiscountUpdateDTO discountDto
+        )
+        {
+            var success = await _productAdminService.UpdateDiscountAsync(id, discountDto.Discount);
+            if (!success)
+                return NotFound(new { message = "Producto no encontrado." });
+            return NoContent();
+        }
     }
 }
