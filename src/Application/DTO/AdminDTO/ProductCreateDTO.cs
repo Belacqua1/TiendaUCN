@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TiendaUCN.src.Application.DTO.ProductsManagementDTO
+namespace TiendaUCN.src.Application.DTO.AdminDTO
 {
     /// <summary>
     /// DTO for creating a new product.
@@ -14,10 +14,10 @@ namespace TiendaUCN.src.Application.DTO.ProductsManagementDTO
         public string? Description { get; set; }
 
         [Required]
-        public Guid BrandId { get; set; }
+        public int BrandId { get; set; }
 
         [Required]
-        public Guid CategoryId { get; set; }
+        public int CategoryId { get; set; }
 
         [Range(1, double.MaxValue)] // R82: price > 0
         public decimal Price { get; set; }
