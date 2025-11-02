@@ -15,6 +15,9 @@ namespace TiendaUCN.src.Infrastructure.Data
         public DbSet<Image> Images { get; set; } = null!;
         public DbSet<Cart> Carts { get; set; } = null!;
         public DbSet<CartItem> CartItems { get; set; } = null!;
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<OrderStatusLog> OrderStatusLogs { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +46,18 @@ namespace TiendaUCN.src.Infrastructure.Data
 
             modelBuilder.Entity<Brand>().HasIndex(b => b.Name).IsUnique();
             modelBuilder.Entity<Brand>().HasIndex(b => b.Slug).IsUnique();
+
+            modelBuilder
+                .Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId);
+
+            modelBuilder
+                .Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderId);
         }
     }
-} 
+}
