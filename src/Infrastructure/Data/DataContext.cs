@@ -1,4 +1,3 @@
-using Bogus.DataSets;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TiendaUCN.src.Domain.Models;
@@ -38,6 +37,12 @@ namespace TiendaUCN.src.Infrastructure.Data
                 .HasOne(i => i.Product)
                 .WithMany(p => p.Images)
                 .HasForeignKey(i => i.ProductId);
+
+            modelBuilder.Entity<Category>().HasIndex(c => c.Name).IsUnique();
+            modelBuilder.Entity<Category>().HasIndex(c => c.Slug).IsUnique();
+
+            modelBuilder.Entity<Brand>().HasIndex(b => b.Name).IsUnique();
+            modelBuilder.Entity<Brand>().HasIndex(b => b.Slug).IsUnique();
         }
     }
-}
+} 

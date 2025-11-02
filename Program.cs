@@ -1,6 +1,5 @@
 using System.Text;
 using Hangfire;
-using TiendaUCN.src.Application.Jobs.Interface;
 using Hangfire.Storage.SQLite;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Resend;
 using Serilog;
 using Tienda_UCN_api.src.Infrastructure.Data;
+using TiendaUCN.src.Application.Jobs.Interface;
 using TiendaUCN.src.Application.Services.Implements;
 using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
@@ -151,10 +151,15 @@ builder.Services.AddScoped<IUserService, UserService>(); // User management logi
 builder.Services.AddScoped<IAuthService, AuthService>(); // Authentication logic
 builder.Services.AddScoped<IImageService, ImageService>(); // Image management logic
 builder.Services.AddScoped<IPublicProductService, PublicProductService>(); // Public product catalog logic
+builder.Services.AddScoped<IProductAdminService, ProductAdminService>(); // Admin product management logic
+builder.Services.AddScoped<ICategoryAdminService, CategoryAdminService>(); // Admin category management logic
 #endregion
 
 #region Application Repositories
-builder.Services.AddScoped<TiendaUCN.src.Infrastructure.Repositories.Interfaces.IImageRepository, TiendaUCN.src.Infrastructure.Repositories.Implements.ImageRepository>();
+builder.Services.AddScoped<
+    TiendaUCN.src.Infrastructure.Repositories.Interfaces.IImageRepository,
+    TiendaUCN.src.Infrastructure.Repositories.Implements.ImageRepository
+>();
 #endregion
 // Controllers
 /// <summary>
