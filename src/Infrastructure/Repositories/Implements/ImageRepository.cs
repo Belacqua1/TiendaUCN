@@ -1,44 +1,50 @@
+using System.Net;
+using Microsoft.EntityFrameworkCore;
+using TiendaUCN.src.Domain.Models;
+using TiendaUCN.src.Infrastructure.Data;
 using TiendaUCN.src.Infrastructure.Repositories.Interfaces;
+
 namespace TiendaUCN.src.Infrastructure.Repositories.Implements
 {
     public class ImageRepository : IImageRepository
     {
         private readonly DataContext _context;
-        private readonly IWebHostEnvironment _environment;
 
-        public ImageRepository(DataContext context, IWebHostEnvironment environment)
+        public ImageRepository(DataContext context)
         {
             _context = context;
-            _environment = environment;
         }
 
-        public async Task<string> UploadImageAsync(IFormFile formFile, string fileName)
+        /// <summary>
+        /// Crea un archivo de imagen en la base de datos.
+        /// </summary>
+        /// <param name="file">El archivo de imagen a crear.</param>
+        /// <returns>True si el archivo se creó correctamente, de lo contrario false y null en caso de que la imagen ya existe.</returns>
+        public async Task<bool?> CreateAsync(Image file)
         {
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
+            var existsImage = await _context.Images.AnyAsync(i => i.PublicId == file.PublicId);
+            if (!existsImage)
             {
-                Directory.CreateDirectory(uploadsFolder);
+                _context.Images.Add(file);
+                return await _context.SaveChangesAsync() > 0;
             }
-
-            var filePath = Path.Combine(uploadsFolder, fileName);
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await formFile.CopyToAsync(fileStream);
-            }
-
-            var imageUrl = $"/uploads/{fileName}";
-            return imageUrl;
+            return null;
         }
 
-        public async Task<bool> DeleteImageAsync(string imageUrl)
+        /// <summary>
+        /// Elimina un archivo de imagen de la base de datos.
+        /// </summary>
+        /// <param name="publicId">El identificador público del archivo a eliminar.</param>
+        /// <returns>True si el archivo se eliminó correctamente, de lo contrario false y null si la imagen no existe.</returns>
+        public async Task<bool?> DeleteAsync(string publicId)
         {
-            var filePath = Path.Combine(_environment.WebRootPath, imageUrl.TrimStart('/'));
-            if (File.Exists(filePath))
+            var image = await _context.Images.FirstOrDefaultAsync(i => i.PublicId == publicId);
+            if (image != null)
             {
-                File.Delete(filePath);
-                return await Task.FromResult(true);
+                _context.Images.Remove(image);
+                return await _context.SaveChangesAsync() > 0;
             }
-            return await Task.FromResult(false);
+            return null;
         }
     }
 }

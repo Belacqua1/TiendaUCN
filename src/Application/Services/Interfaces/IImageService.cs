@@ -2,7 +2,7 @@ namespace TiendaUCN.src.Application.Services.Interfaces
 {
     public interface IImageService
     {
-        Task<string> UploadImageAsync(IFormFile formFile, string fileName);
-        Task<bool> DeleteImageAsync(string imageUrl);
+        Task<bool> UploadImageAsync(IFormFile file, int productId);
+        Task<bool> DeleteImageAsync(string publicId);
     }
 }
