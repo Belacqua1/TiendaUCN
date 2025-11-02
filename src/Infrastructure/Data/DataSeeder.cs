@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TiendaUCN.src.Domain.Models;
+using TiendaUCN.src.Infrastructure.Data;
 
 namespace Tienda_UCN_api.src.Infrastructure.Data
 {

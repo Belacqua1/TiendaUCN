@@ -359,11 +359,12 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             return new GenericResponse<string>("Perfil actualizado exitosamente.", null, true);
         }
+
         public async Task<int> DeleteUnconfirmedUsersAsync()
         {
             var cutoffDate = DateTime.UtcNow.AddDays(-7);
-            var unconfirmedUsers = await _userManager.Users
-                .Where(u => !u.EmailConfirmed && u.RegisteredAt < cutoffDate)
+            var unconfirmedUsers = await _userManager
+                .Users.Where(u => !u.EmailConfirmed && u.RegisteredAt < cutoffDate)
                 .ToListAsync();
 
             int deletedCount = 0;

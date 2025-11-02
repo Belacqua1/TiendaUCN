@@ -13,6 +13,7 @@ using Tienda_UCN_api.src.Infrastructure.Data;
 using TiendaUCN.src.Application.Services.Implements;
 using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
+using TiendaUCN.src.Infrastructure.Data;
 
 /// <summary>
 /// Entry point of the Tienda UCN API application.
@@ -148,8 +149,13 @@ builder.Services.AddScoped<IEmailService, EmailService>(); // Email operations
 builder.Services.AddScoped<IVerificationService, VerificationService>(); // Verification logic
 builder.Services.AddScoped<IUserService, UserService>(); // User management logic
 builder.Services.AddScoped<IAuthService, AuthService>(); // Authentication logic
+builder.Services.AddScoped<IImageService, ImageService>(); // Image management logic
+builder.Services.AddScoped<IPublicProductService, PublicProductService>(); // Public product catalog logic
 #endregion
 
+#region Application Repositories
+builder.Services.AddScoped<TiendaUCN.src.Infrastructure.Repositories.Interfaces.IImageRepository, TiendaUCN.src.Infrastructure.Repositories.Implements.ImageRepository>();
+#endregion
 // Controllers
 /// <summary>
 /// Adds support for API controllers.
