@@ -66,11 +66,11 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                 {
                     var categories = new List<Category>
                     {
-                        new Category { Name = "Electronics" },
-                        new Category { Name = "Clothing" },
-                        new Category { Name = "Home Appliances" },
-                        new Category { Name = "Books" },
-                        new Category { Name = "Sports" },
+                        new Category { Name = "Electronics", Slug = "electronics" },
+                        new Category { Name = "Clothing", Slug = "clothing" },
+                        new Category { Name = "Home Appliances", Slug = "home-appliances" },
+                        new Category { Name = "Books", Slug = "books" },
+                        new Category { Name = "Sports", Slug = "sports" },
                     };
                     await context.Categories.AddRangeAsync(categories);
                     await context.SaveChangesAsync();
@@ -82,9 +82,9 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                 {
                     var brands = new List<Brand>
                     {
-                        new Brand { Name = "Sony" },
-                        new Brand { Name = "Apple" },
-                        new Brand { Name = "HP" },
+                        new Brand { Name = "Sony", Slug = "sony" },
+                        new Brand { Name = "Apple", Slug = "apple" },
+                        new Brand { Name = "HP", Slug = "hp" },
                     };
                     await context.Brands.AddRangeAsync(brands);
                     await context.SaveChangesAsync();
@@ -181,6 +181,52 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                             "No se pudo crear el usuario administrador."
                         );
                     }
+                    // Creación de usuario fijo para pruebas
+                    var testUser = new User
+                    {
+                        FirstName = "Juan",
+                        LastName = "Pérez",
+                        Email = "juan.perez@example.com",
+                        EmailConfirmed = false, // Para probar el resend verification
+                        Gender = "Masculino",
+                        Rut = "12345678-9",
+                        BirthDate = new DateTime(1990, 1, 1),
+                        PhoneNumber = "+569 12345678",
+                        UserName = "juan.perez@example.com",
+                        RegisteredAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        VerificationCode = "123456", // Código de verificación fijo para pruebas
+                        VerificationCodeExpires = DateTime.Now.AddHours(24), // Expira en 24 horas
+                    };
+
+                    var testPassword = "Test123!";
+                    var testResult = await userManager.CreateAsync(testUser, testPassword);
+                    if (testResult.Succeeded)
+                    {
+                        var roleResult = await userManager.AddToRoleAsync(
+                            testUser,
+                            customerRole.Name!
+                        );
+                        if (!roleResult.Succeeded)
+                        {
+                            Log.Error(
+                                "Error asignando rol al usuario de prueba: {Errors}",
+                                string.Join(", ", roleResult.Errors.Select(e => e.Description))
+                            );
+                        }
+                        else
+                        {
+                            Log.Information("Usuario de prueba creado: juan.perez@example.com");
+                        }
+                    }
+                    else
+                    {
+                        Log.Error(
+                            "Error creando usuario de prueba: {Errors}",
+                            string.Join(", ", testResult.Errors.Select(e => e.Description))
+                        );
+                    }
+
                     // Creación de usuarios aleatorios
                     var randomPassword =
                         configuration["User:RandomUserPassword"]
@@ -198,7 +244,7 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                         .RuleFor(u => u.BirthDate, f => f.Date.Past(30, DateTime.Now.AddYears(-18)))
                         .RuleFor(u => u.PhoneNumber, f => RandomPhoneNumber())
                         .RuleFor(u => u.UserName, (f, u) => u.Email);
-                    var users = userFaker.Generate(99);
+                    var users = userFaker.Generate(98); // Reducido a 98 para incluir el usuario fijo
                     foreach (var user in users)
                     {
                         var result = await userManager.CreateAsync(user, randomPassword);

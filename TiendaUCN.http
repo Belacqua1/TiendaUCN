@@ -1,6 +1,426 @@
 @TiendaUCN_HostAddress = http://localhost:5121
 
-GET {{TiendaUCN_HostAddress}}/weatherforecast/
-Accept: application/json
+###
+# ===========================================
+# 🛒 TIENDA UCN - GUÍA COMPLETA DE ENDPOINTS
+# ===========================================
+# Aplicación corriendo en: http://localhost:5121
+# Base de datos: SQLite (app.db)
+# ===========================================
+
+###
+# ===========================================
+# 🔐 AUTENTICACIÓN Y REGISTRO
+# ===========================================
+
+### 1. REGISTRO DE USUARIO
+# POST /api/auth/register
+# Registra un nuevo usuario y envía código de verificación por email
+# NOTA: El DTO requiere campos adicionales según RegisterDTO.cs
+POST {{TiendaUCN_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Juan",
+  "lastName": "Pérez",
+  "gender": "Masculino",
+  "birthDate": "1990-05-15",
+  "rut": "12345678-9",
+  "email": "juan.perez@example.com",
+  "phone": "+56912345678",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+
+### 2. VERIFICAR EMAIL
+# POST /api/auth/verify
+# Verifica el código enviado al email para activar cuenta
+POST {{TiendaUCN_HostAddress}}/api/auth/verify
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com",
+  "code": "123456"
+}
+
+### 3. LOGIN
+# POST /api/auth/login
+# Inicia sesión y obtiene JWT token
+POST {{TiendaUCN_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com",
+  "password": "Password123!",
+  "rememberMe": false
+}
+
+### 4. RECUPERAR CONTRASEÑA
+# POST /api/auth/recover-password
+# Envía código de recuperación por email
+POST {{TiendaUCN_HostAddress}}/api/auth/recover-password
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com"
+}
+
+### 5. RESET CONTRASEÑA
+# PATCH /api/auth/reset-password
+# Cambia contraseña usando código de recuperación
+PATCH {{TiendaUCN_HostAddress}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com",
+  "code": "123456",
+  "newPassword": "NewPassword123!"
+}
+
+### 6. REENVIAR CÓDIGO DE VERIFICACIÓN
+# POST /api/auth/resend-verification
+# Reenvía código de verificación por email si el usuario no está verificado
+POST {{TiendaUCN_HostAddress}}/api/auth/resend-verification
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com"
+}
+
+###
+# ===========================================
+# 👤 GESTIÓN DE PERFIL DE USUARIO
+# ===========================================
+# ⚠️ REQUIERE AUTENTICACIÓN (Bearer Token)
+
+### 6. OBTENER PERFIL
+# GET /api/user/profile
+GET {{TiendaUCN_HostAddress}}/api/user/profile
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 7. ACTUALIZAR PERFIL
+# PUT /api/user/profile
+PUT {{TiendaUCN_HostAddress}}/api/user/profile
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "firstName": "Juan Carlos",
+  "lastName": "Pérez González",
+  "phoneNumber": "+56987654321"
+}
+
+### 8. VERIFICAR CAMBIO DE EMAIL
+# POST /api/user/verify-code-email
+POST {{TiendaUCN_HostAddress}}/api/user/verify-code-email
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "code": "123456"
+}
+
+###
+# ===========================================
+# 🛍️ PRODUCTOS PÚBLICOS
+# ===========================================
+
+### 9. LISTAR PRODUCTOS
+# GET /api/products
+# Parámetros opcionales: page, pageSize, search, categoryId, brandId, minPrice, maxPrice, sortBy, sortOrder
+GET {{TiendaUCN_HostAddress}}/api/products?page=1&pageSize=10&search=laptop&sortBy=price&sortOrder=asc
+
+### 10. OBTENER PRODUCTO POR ID
+# GET /api/products/{id}
+GET {{TiendaUCN_HostAddress}}/api/products/1
+
+###
+# ===========================================
+# 🛒 CARRITO DE COMPRAS
+# ===========================================
+# ⚠️ REQUIERE AUTENTICACIÓN (Bearer Token)
+
+### 11. OBTENER CARRITO
+# GET /api/cart
+GET {{TiendaUCN_HostAddress}}/api/cart
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 12. AGREGAR ITEM AL CARRITO
+# POST /api/cart/items
+POST {{TiendaUCN_HostAddress}}/api/cart/items
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="productId"
+
+1
+------WebKitFormBoundary
+Content-Disposition: form-data; name="quantity"
+
+2
+------WebKitFormBoundary--
+
+### 13. ACTUALIZAR CANTIDAD DE ITEM
+# PUT /api/cart/items/{productId}
+PUT {{TiendaUCN_HostAddress}}/api/cart/items/1
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="quantity"
+
+5
+------WebKitFormBoundary--
+
+### 14. ELIMINAR ITEM DEL CARRITO
+# DELETE /api/cart/items/{productId}
+DELETE {{TiendaUCN_HostAddress}}/api/cart/items/1
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 15. CHECKOUT (REALIZAR PEDIDO)
+# POST /api/cart/checkout
+# ⚠️ Solo para usuarios con rol "Customer"
+POST {{TiendaUCN_HostAddress}}/api/cart/checkout
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+###
+# ===========================================
+# 👑 ADMINISTRACIÓN - USUARIOS
+# ===========================================
+# ⚠️ REQUIERE AUTENTICACIÓN + ROL ADMIN
+
+### 16. LISTAR USUARIOS
+# GET /api/admin/users
+# Parámetros: page, pageSize, search, role, status, sortBy, sortOrder
+GET {{TiendaUCN_HostAddress}}/api/admin/users?page=1&pageSize=10&role=Customer&status=Active
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 17. OBTENER USUARIO POR ID
+# GET /api/admin/users/{id}
+GET {{TiendaUCN_HostAddress}}/api/admin/users/1
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 18. ACTUALIZAR ESTADO DE USUARIO
+# PATCH /api/admin/users/{id}/status
+PATCH {{TiendaUCN_HostAddress}}/api/admin/users/1/status
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "isLocked": true,
+  "reason": "Violación de términos de servicio"
+}
+
+### 19. ACTUALIZAR ROL DE USUARIO
+# PATCH /api/admin/users/{id}/role
+PATCH {{TiendaUCN_HostAddress}}/api/admin/users/1/role
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "newRole": "Admin"
+}
+
+###
+# ===========================================
+# 👑 ADMINISTRACIÓN - PRODUCTOS
+# ===========================================
+# ⚠️ REQUIERE AUTENTICACIÓN + ROL ADMIN
+
+### 20. LISTAR PRODUCTOS (ADMIN)
+# GET /api/admin/products
+# Parámetros: page, pageSize, search, categoryId, brandId, status, sortBy, sortOrder
+GET {{TiendaUCN_HostAddress}}/api/admin/products?page=1&pageSize=10&status=Available
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 21. OBTENER PRODUCTO POR ID (ADMIN)
+# GET /api/admin/products/{id}
+GET {{TiendaUCN_HostAddress}}/api/admin/products/1
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 22. CREAR PRODUCTO
+# POST /api/admin/products
+POST {{TiendaUCN_HostAddress}}/api/admin/products
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Laptop Gaming XYZ",
+  "title": "Laptop Gaming XYZ 15.6\"",
+  "description": "Potente laptop para gaming con RTX 4060",
+  "price": 1299990,
+  "stock": 50,
+  "categoryId": 1,
+  "brandId": 1,
+  "isAvailable": true
+}
+
+### 23. ACTUALIZAR PRODUCTO
+# PUT /api/admin/products/{id}
+PUT {{TiendaUCN_HostAddress}}/api/admin/products/1
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Laptop Gaming XYZ Updated",
+  "title": "Laptop Gaming XYZ 15.6\" Updated",
+  "description": "Potente laptop para gaming con RTX 4060 - Edición Especial",
+  "price": 1399990,
+  "stock": 45,
+  "categoryId": 1,
+  "brandId": 1,
+  "isAvailable": true
+}
+
+### 24. ELIMINAR PRODUCTO (SOFT DELETE)
+# DELETE /api/admin/products/{id}
+DELETE {{TiendaUCN_HostAddress}}/api/admin/products/1
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 25. SUBIR IMAGEN A PRODUCTO
+# POST /api/admin/products/{id}/images
+POST {{TiendaUCN_HostAddress}}/api/admin/products/1/images
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="laptop.jpg"
+Content-Type: image/jpeg
+
+< /path/to/your/image.jpg >
+------WebKitFormBoundary--
+
+### 26. ELIMINAR IMAGEN DE PRODUCTO
+# DELETE /api/admin/products/{id}/images/{publicId}
+DELETE {{TiendaUCN_HostAddress}}/api/admin/products/1/images/your_image_public_id
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 27. ACTUALIZAR ESTADO DE PRODUCTO
+# PATCH /api/admin/products/{id}/status
+PATCH {{TiendaUCN_HostAddress}}/api/admin/products/1/status
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "isAvailable": false
+}
+
+### 28. ACTUALIZAR DESCUENTO DE PRODUCTO
+# PATCH /api/admin/products/{id}/discount
+PATCH {{TiendaUCN_HostAddress}}/api/admin/products/1/discount
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "discount": 15.5
+}
+
+###
+# ===========================================
+# 👑 ADMINISTRACIÓN - CATEGORÍAS
+# ===========================================
+# ⚠️ REQUIERE AUTENTICACIÓN + ROL ADMIN
+
+### 29. LISTAR CATEGORÍAS
+# GET /api/admin/categories
+GET {{TiendaUCN_HostAddress}}/api/admin/categories?page=1&pageSize=10
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 30. CREAR CATEGORÍA
+# POST /api/admin/categories
+POST {{TiendaUCN_HostAddress}}/api/admin/categories
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Electrónicos",
+  "description": "Productos electrónicos y tecnología"
+}
+
+### 31. ACTUALIZAR CATEGORÍA
+# PUT /api/admin/categories/{id}
+PUT {{TiendaUCN_HostAddress}}/api/admin/categories/1
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Electrónicos y Tecnología",
+  "description": "Productos electrónicos, computadoras y tecnología"
+}
+
+### 32. ELIMINAR CATEGORÍA
+# DELETE /api/admin/categories/{id}
+DELETE {{TiendaUCN_HostAddress}}/api/admin/categories/1
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+###
+# ===========================================
+# 👑 ADMINISTRACIÓN - ÓRDENES/PEDIDOS
+# ===========================================
+# ⚠️ REQUIERE AUTENTICACIÓN + ROL ADMIN
+
+### 33. LISTAR ÓRDENES
+# GET /api/admin/orders
+# Parámetros: page, pageSize, status, customerEmail, dateFrom, dateTo, sortBy, sortOrder
+GET {{TiendaUCN_HostAddress}}/api/admin/orders?page=1&pageSize=10&status=Pending
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 34. OBTENER ORDEN POR ID
+# GET /api/admin/orders/{id}
+GET {{TiendaUCN_HostAddress}}/api/admin/orders/1
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+
+### 35. ACTUALIZAR ESTADO DE ORDEN
+# PATCH /api/admin/orders/{id}/status
+PATCH {{TiendaUCN_HostAddress}}/api/admin/orders/1/status
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "newStatus": "Shipped"
+}
+
+###
+# ===========================================
+# 📋 INSTRUCCIONES PARA TESTING
+# ===========================================
+
+# 1. REGISTRO Y LOGIN:
+#    - Primero registra un usuario (endpoint 1)
+#    - Verifica el email (endpoint 2) o reenvía código (endpoint 6)
+#    - Haz login para obtener JWT token (endpoint 3)
+
+# USUARIO DE PRUEBA FIJO:
+#    - Email: juan.perez@example.com
+#    - Password: Test123!
+#    - Estado: No verificado (para probar resend-verification)
+
+# 2. TESTING DE PRODUCTOS:
+#    - Lista productos públicos (endpoint 9)
+#    - Obtén detalles de un producto (endpoint 10)
+
+# 3. TESTING DE CARRITO:
+#    - Agrega items al carrito (endpoint 12)
+#    - Actualiza cantidades (endpoint 13)
+#    - Elimina items (endpoint 14)
+#    - Revisa el carrito (endpoint 11)
+
+# 4. TESTING ADMIN (REQUIERE USUARIO ADMIN):
+#    - Gestiona usuarios (endpoints 16-19)
+#    - Gestiona productos (endpoints 20-28)
+#    - Gestiona categorías (endpoints 29-32)
+#    - Gestiona órdenes (endpoints 33-35)
+
+# 5. TOKENS:
+#    - Reemplaza YOUR_JWT_TOKEN_HERE con el token obtenido del login
+#    - Reemplaza YOUR_ADMIN_JWT_TOKEN_HERE con token de usuario admin
+
+# 6. NOTAS IMPORTANTES:
+#    - Algunos endpoints requieren roles específicos
+#    - Las imágenes se suben como multipart/form-data
+#    - Los endpoints de paginación incluyen headers X-Pagination-*
+#    - Las fechas usan formato ISO 8601
+#    - Los precios están en pesos chilenos (sin decimales)
 
 ###

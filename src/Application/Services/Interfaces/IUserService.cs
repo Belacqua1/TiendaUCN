@@ -32,5 +32,6 @@ namespace TiendaUCN.src.Application.Services.Interfaces
         Task<GenericResponse<UserProfileDto>> GetUserProfileAsync(int userId);
         Task<GenericResponse<string>> UpdateProfileAsync(int userId, UpdateProfileDTO dto);
         Task<int> DeleteUnconfirmedUsersAsync();
+        Task<GenericResponse<string>> ResendVerificationCodeAsync(string email);
     }
 }

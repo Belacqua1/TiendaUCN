@@ -393,5 +393,46 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             return deletedCount;
         }
+
+        public async Task<GenericResponse<string>> ResendVerificationCodeAsync(string email)
+        {
+            // Check if user exists
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return new GenericResponse<string>(
+                    message: "Usuario no encontrado.",
+                    data: null,
+                    success: false
+                );
+
+            // Check if email is already verified
+            if (user.EmailConfirmed)
+                return new GenericResponse<string>(
+                    message: "El correo ya está verificado.",
+                    data: null,
+                    success: false
+                );
+
+            try
+            {
+                // Generate and send new verification code
+                await _verificationService.GenerateAndSendCodeAsync(email, "VerificationCode");
+
+                return new GenericResponse<string>(
+                    message: "Código de verificación reenviado correctamente.",
+                    data: null,
+                    success: true
+                );
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error al reenviar código de verificación para {Email}", email);
+                return new GenericResponse<string>(
+                    message: $"Error al reenviar código: {ex.Message}",
+                    data: null,
+                    success: false
+                );
+            }
+        }
     }
 }

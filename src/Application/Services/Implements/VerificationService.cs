@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 using TiendaUCN.src.Application.Services.Interfaces;
 using TiendaUCN.src.Domain.Models;
 
@@ -37,6 +38,9 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             // Generar código de 6 dígitos
             var code = new Random().Next(100000, 999999).ToString();
+            Log.Information(
+                $"[VERIFICATION DEBUG] (esto es para test)Código generado para {email}: {code}"
+            );
 
             user.VerificationCode = code;
             user.VerificationCodeExpires = DateTime.UtcNow.AddMinutes(10);

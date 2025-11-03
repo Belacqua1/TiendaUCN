@@ -138,5 +138,23 @@ namespace TiendaUCN.src.Api.Controllers
 
             return Ok(new { success = true, message = response.Message });
         }
+
+        /// <summary>
+        /// Resends verification code to user's email.
+        /// </summary>
+        /// <param name="dto">Data transfer object containing the email.</param>
+        /// <returns>
+        /// Returns a 200 OK with success message if code is resent.
+        /// Returns a 400 BadRequest if user not found or email already verified.
+        /// </returns>
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerification([FromBody] ResendVerificationDTO dto)
+        {
+            var response = await _userService.ResendVerificationCodeAsync(dto.Email);
+            if (!response.Success)
+                return BadRequest(new { success = false, message = response.Message });
+
+            return Ok(new { success = true, message = response.Message });
+        }
     }
 }
