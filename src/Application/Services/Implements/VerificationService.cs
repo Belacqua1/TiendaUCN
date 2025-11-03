@@ -34,18 +34,18 @@ namespace TiendaUCN.src.Application.Services.Implements
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                throw new Exception("Usuario no encontrado.");
+                throw new Exception("User not found.");
 
-            // Generar código de 6 dígitos
+            // Generate 6-digit code
             var code = new Random().Next(100000, 999999).ToString();
             Log.Information(
-                $"[VERIFICATION DEBUG] (esto es para test)Código generado para {email}: {code}"
+                $"[VERIFICATION DEBUG] (this is for test)Code generated for {email}: {code}"
             );
 
             user.VerificationCode = code;
             user.VerificationCodeExpires = DateTime.UtcNow.AddMinutes(10);
 
-            // Si es verificación de cambio de correo
+            // If it's email change verification
             if (isPendingEmail && user.PendingEmail != null)
             {
                 await _emailService.SendVerificationCodeEmailAsync(
@@ -68,7 +68,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (user == null)
                 return false;
 
-            // Validaciones
+            // Validations
             if (user.VerificationCode == null || user.VerificationCodeExpires == null)
                 return false;
 
@@ -78,7 +78,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (user.VerificationCode != code)
                 return false;
 
-            // Confirmar email y limpiar código
+            // Confirm email and clear code
             user.EmailConfirmed = true;
             user.VerificationCode = null;
             user.VerificationCodeExpires = null;
@@ -107,14 +107,14 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (user.VerificationCode != code)
                 return false;
 
-            // Actualizar el email real con el pendiente
+            // Update the real email with the pending one
             user.Email = user.PendingEmail;
-            user.UserName = user.PendingEmail; // Identity suele usar el email como username
+            user.UserName = user.PendingEmail; // Identity usually uses email as username
             user.NormalizedEmail = user.PendingEmail.ToUpper();
             user.NormalizedUserName = user.PendingEmail.ToUpper();
             user.EmailConfirmed = true;
 
-            // Limpiar datos temporales
+            // Clear temporary data
             user.PendingEmail = null;
             user.VerificationCode = null;
             user.VerificationCodeExpires = null;
@@ -139,7 +139,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (user.VerificationCode != code)
                 return false;
 
-            // Limpia el código después de la verificación
+            // Clear the code after verification
             user.VerificationCode = null;
             user.VerificationCodeExpires = null;
             await _userManager.UpdateAsync(user);

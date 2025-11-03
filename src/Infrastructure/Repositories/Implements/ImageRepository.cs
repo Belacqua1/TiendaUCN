@@ -16,10 +16,10 @@ namespace TiendaUCN.src.Infrastructure.Repositories.Implements
         }
 
         /// <summary>
-        /// Crea un archivo de imagen en la base de datos.
+        /// Creates an image file in the database.
         /// </summary>
-        /// <param name="file">El archivo de imagen a crear.</param>
-        /// <returns>True si el archivo se creó correctamente, de lo contrario false y null en caso de que la imagen ya existe.</returns>
+        /// <param name="file">The image file to create.</param>
+        /// <returns>True if the file was created successfully, otherwise false and null if the image already exists.</returns>
         public async Task<bool?> CreateAsync(Image file)
         {
             var existsImage = await _context.Images.AnyAsync(i => i.PublicId == file.PublicId);
@@ -32,10 +32,10 @@ namespace TiendaUCN.src.Infrastructure.Repositories.Implements
         }
 
         /// <summary>
-        /// Elimina un archivo de imagen de la base de datos.
+        /// Deletes an image file from the database.
         /// </summary>
-        /// <param name="publicId">El identificador público del archivo a eliminar.</param>
-        /// <returns>True si el archivo se eliminó correctamente, de lo contrario false y null si la imagen no existe.</returns>
+        /// <param name="publicId">The public identifier of the file to delete.</param>
+        /// <returns>True if the file was deleted successfully, otherwise false and null if the image does not exist.</returns>
         public async Task<bool?> DeleteAsync(string publicId)
         {
             var image = await _context.Images.FirstOrDefaultAsync(i => i.PublicId == publicId);

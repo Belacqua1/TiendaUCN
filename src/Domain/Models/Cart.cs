@@ -3,42 +3,42 @@ namespace TiendaUCN.src.Domain.Models
     public class Cart
     {
         /// <summary>
-        /// Identificador único del carrito de compras.
+        /// Unique identifier of the shopping cart.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Total del carrito de compras incluyendo descuentos.
+        /// Total of the shopping cart including discounts.
         /// </summary>
         public int Total { get; set; }
 
         /// <summary>
-        /// Subtotal del carrito de compras sin descuentos.
+        /// Subtotal of the shopping cart without discounts.
         /// </summary>
         public int SubTotal { get; set; }
 
         /// <summary>
-        /// Usuario que tiene el carrito (sin autenticación).
+        /// User who has the cart (without authentication).
         /// </summary>
         public string BuyerId { get; set; } = null!;
 
         /// <summary>
-        /// Identificador del usuario que posee el carrito de compras (autenticado).
+        /// Identifier of the user who owns the shopping cart (authenticated).
         /// </summary>
         public int? UserId { get; set; }
 
         /// <summary>
-        /// Lista de artículos en el carrito de compras.
+        /// List of items in the shopping cart.
         /// </summary>
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 
         /// <summary>
-        /// Fecha de creación del carrito de compras.
+        /// Creation date of the shopping cart.
         /// </summary>
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// Fecha de actualización del carrito de compras.
+        /// Update date of the shopping cart.
         /// </summary>
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

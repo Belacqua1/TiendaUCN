@@ -57,12 +57,12 @@ namespace TiendaUCN.src.Application.Services.Implements
             // Check if the email already exists
             var existingEmail = await _userManager.FindByEmailAsync(registerDto.Email);
             if (existingEmail != null)
-                return new GenericResponse<string>(message: "El email ya existe", data: null);
+                return new GenericResponse<string>(message: "The email already exists", data: null);
 
             // Check if the RUT is already registered
             var existingRut = await _userManager.Users.AnyAsync(u => u.Rut == registerDto.Rut);
             if (existingRut)
-                return new GenericResponse<string>(message: "El RUT ya existe", data: null);
+                return new GenericResponse<string>(message: "The RUT already exists", data: null);
 
             // Create a new user object
             var user = new User
@@ -85,7 +85,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return new GenericResponse<string>($"Error al crear el usuario: {errors}", null);
+                return new GenericResponse<string>($"Error creating the user: {errors}", null);
             }
 
             // Ensure the "Cliente" role exists, otherwise create it
@@ -98,24 +98,24 @@ namespace TiendaUCN.src.Application.Services.Implements
             try
             {
                 // Generate and send the verification code via email
-                Console.WriteLine($"[DEBUG] Generando código de verificación para {user.Email}");
+                Console.WriteLine($"[DEBUG] Generating verification code for {user.Email}");
                 await _verificationService.GenerateAndSendCodeAsync(
                     user.Email,
                     nameHtml: "VerificationCode"
                 );
-                Console.WriteLine($"[DEBUG] Código enviado a {user.Email}");
+                Console.WriteLine($"[DEBUG] Code sent to {user.Email}");
 
                 return new GenericResponse<string>(
-                    "Usuario registrado exitosamente. Por favor, verifica tu email.",
+                    "User registered successfully. Please verify your email.",
                     null
                 );
             }
             catch (Exception ex)
             {
                 // Log any error and return failure response
-                Console.WriteLine($"[ERROR] No se pudo enviar correo: {ex.Message}");
+                Console.WriteLine($"[ERROR] Could not send email: {ex.Message}");
                 return new GenericResponse<string>(
-                    $"No se pudo enviar el correo de verificación: {ex.Message}",
+                    $"Could not send verification email: {ex.Message}",
                     null
                 );
             }
@@ -127,7 +127,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (existingUser == null)
             {
                 return new GenericResponse<string>(
-                    message: "El email no está asociado a ninguna cuenta",
+                    message: "The email is not associated with any account",
                     data: null,
                     success: false
                 );
@@ -136,7 +136,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             await _verificationService.GenerateAndSendCodeAsync(dto.Email, nameHtml: "RecoverCode");
 
             return new GenericResponse<string>(
-                message: "Se ha enviado un código de verificación a su correo electrónico.",
+                message: "A verification code has been sent to your email.",
                 data: null,
                 success: true
             );
@@ -151,14 +151,14 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (!isCodeValid)
             {
                 return new GenericResponse<string>(
-                    message: "Código inválido o expirado",
+                    message: "Invalid or expired code",
                     data: null,
                     success: false
                 );
             }
             var user = await _userManager.FindByEmailAsync(dto.Email);
             if (user == null)
-                return new GenericResponse<string>(message: "Usuario no encontrado.", data: null);
+                return new GenericResponse<string>(message: "User not found.", data: null);
 
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
@@ -168,13 +168,13 @@ namespace TiendaUCN.src.Application.Services.Implements
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 return new GenericResponse<string>(
-                    message: $"No se pudo cambiar la contraseña: {errors}",
+                    message: $"Could not change password: {errors}",
                     data: null
                 );
             }
 
             return new GenericResponse<string>(
-                message: "Contraseña cambiada correctamente.",
+                message: "Password changed successfully.",
                 data: null
             );
         }
@@ -187,7 +187,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             {
                 Log.Warning("Profile request failed: user {UserId} not found", userId);
                 return new GenericResponse<UserProfileDto>(
-                    message: "Usuario no encontrado.",
+                    message: "User not found.",
                     data: null,
                     success: false
                 );
@@ -213,7 +213,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             );
 
             return new GenericResponse<UserProfileDto>(
-                message: "Usuario encontrado exitosamente.",
+                message: "User found successfully.",
                 data: profile,
                 success: true
             );
@@ -227,11 +227,8 @@ namespace TiendaUCN.src.Application.Services.Implements
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
-                Log.Warning(
-                    "Intento de actualización fallido: usuario {UserId} no encontrado",
-                    userId
-                );
-                return new GenericResponse<string>("Usuario no encontrado.", null, false);
+                Log.Warning("Profile update attempt failed: user {UserId} not found", userId);
+                return new GenericResponse<string>("User not found.", null, false);
             }
 
             bool modified = false;
@@ -255,7 +252,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             {
                 var validGenders = new[] { "Masculino", "Femenino", "Otro" };
                 if (!validGenders.Contains(dto.Gender))
-                    return new GenericResponse<string>("Género inválido.", null, false);
+                    return new GenericResponse<string>("Invalid gender.", null, false);
 
                 user.Gender = dto.Gender;
                 modified = true;
@@ -275,7 +272,11 @@ namespace TiendaUCN.src.Application.Services.Implements
                     u.Rut == dto.Rut && u.Id != userId
                 );
                 if (existingRut)
-                    return new GenericResponse<string>("El RUT ya está registrado.", null, false);
+                    return new GenericResponse<string>(
+                        "The RUT is already registered.",
+                        null,
+                        false
+                    );
 
                 user.Rut = dto.Rut;
                 modified = true;
@@ -289,7 +290,7 @@ namespace TiendaUCN.src.Application.Services.Implements
                 );
                 if (existingEmail)
                     return new GenericResponse<string>(
-                        "El correo ya está registrado.",
+                        "The email is already registered.",
                         null,
                         false
                     );
@@ -304,7 +305,7 @@ namespace TiendaUCN.src.Application.Services.Implements
                         nameHtml: "VerificationCode"
                     );
                     Log.Information(
-                        "Se envió código de verificación para cambio de correo a {Email}",
+                        "Verification code sent for email change to {Email}",
                         dto.Email
                     );
                 }
@@ -321,7 +322,7 @@ namespace TiendaUCN.src.Application.Services.Implements
 
             if (!modified)
                 return new GenericResponse<string>(
-                    "No se enviaron campos válidos para actualizar.",
+                    "No valid fields were sent to update.",
                     null,
                     false
                 );
@@ -332,20 +333,16 @@ namespace TiendaUCN.src.Application.Services.Implements
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                Log.Error(
-                    "Error al actualizar perfil de usuario {UserId}: {Errors}",
-                    userId,
-                    errors
-                );
+                Log.Error("Error updating user profile {UserId}: {Errors}", userId, errors);
                 return new GenericResponse<string>(
-                    $"Error al actualizar perfil: {errors}",
+                    $"Error updating profile: {errors}",
                     null,
                     false
                 );
             }
 
             Log.Information(
-                "Usuario {UserId} actualizó su perfil el {Date}. Campos modificados: {Fields}",
+                "User {UserId} updated their profile on {Date}. Modified fields: {Fields}",
                 userId,
                 DateTime.Now,
                 string.Join(
@@ -357,7 +354,7 @@ namespace TiendaUCN.src.Application.Services.Implements
                 )
             );
 
-            return new GenericResponse<string>("Perfil actualizado exitosamente.", null, true);
+            return new GenericResponse<string>("Profile updated successfully.", null, true);
         }
 
         public async Task<int> DeleteUnconfirmedUsersAsync()
@@ -375,16 +372,13 @@ namespace TiendaUCN.src.Application.Services.Implements
                 if (result.Succeeded)
                 {
                     deletedCount++;
-                    Log.Information(
-                        "Usuario no confirmado {UserId} eliminado automáticamente.",
-                        user.Id
-                    );
+                    Log.Information("Unconfirmed user {UserId} deleted automatically.", user.Id);
                 }
                 else
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                     Log.Error(
-                        "Error al eliminar usuario no confirmado {UserId}: {Errors}",
+                        "Error deleting unconfirmed user {UserId}: {Errors}",
                         user.Id,
                         errors
                     );
@@ -400,7 +394,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return new GenericResponse<string>(
-                    message: "Usuario no encontrado.",
+                    message: "User not found.",
                     data: null,
                     success: false
                 );
@@ -408,7 +402,7 @@ namespace TiendaUCN.src.Application.Services.Implements
             // Check if email is already verified
             if (user.EmailConfirmed)
                 return new GenericResponse<string>(
-                    message: "El correo ya está verificado.",
+                    message: "The email is already verified.",
                     data: null,
                     success: false
                 );
@@ -419,16 +413,16 @@ namespace TiendaUCN.src.Application.Services.Implements
                 await _verificationService.GenerateAndSendCodeAsync(email, "VerificationCode");
 
                 return new GenericResponse<string>(
-                    message: "Código de verificación reenviado correctamente.",
+                    message: "Verification code resent successfully.",
                     data: null,
                     success: true
                 );
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al reenviar código de verificación para {Email}", email);
+                Log.Error(ex, "Error resending verification code for {Email}", email);
                 return new GenericResponse<string>(
-                    message: $"Error al reenviar código: {ex.Message}",
+                    message: $"Error resending code: {ex.Message}",
                     data: null,
                     success: false
                 );

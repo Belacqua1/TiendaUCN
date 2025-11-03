@@ -15,10 +15,10 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
     public class DataSeeder
     {
         /// <summary>
-        /// Método para inicializar la base de datos con datos de prueba.
+        /// Method to initialize the database with test data.
         /// </summary>
-        /// <param name="serviceProvider">Proveedor de servicios para obtener el contexto de datos y otros servicios.</param>
-        /// <returns>Tarea asíncrona que representa la operación de inicialización.</returns>
+        /// <param name="serviceProvider">Service provider to get the data context and other services.</param>
+        /// <returns>Asynchronous task representing the initialization operation.</returns>
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
             try
@@ -32,10 +32,10 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                 var genders =
                     configuration.GetSection("Genders").Get<string[]>()
                     ?? throw new InvalidOperationException(
-                        "La configuración de genero no está completa"
+                        "The gender configuration is not complete"
                     );
 
-                // Creación de roles
+                // Role creation
                 if (!context.Roles.Any())
                 {
                     var roles = new List<Role>
@@ -58,10 +58,10 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                             );
                         }
                     }
-                    Log.Information("Roles creados con éxito.");
+                    Log.Information("Roles created successfully.");
                 }
 
-                // Creación de categorías
+                // Category creation
                 if (!context.Categories.Any())
                 {
                     var categories = new List<Category>
@@ -74,10 +74,10 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                     };
                     await context.Categories.AddRangeAsync(categories);
                     await context.SaveChangesAsync();
-                    Log.Information("Categorías creadas con éxito.");
+                    Log.Information("Categories created successfully.");
                 }
 
-                // Creación de marcas
+                // Brand creation
                 if (!await context.Brands.AnyAsync())
                 {
                     var brands = new List<Brand>
@@ -88,7 +88,7 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                     };
                     await context.Brands.AddRangeAsync(brands);
                     await context.SaveChangesAsync();
-                    Log.Information("Marcas creadas con éxito.");
+                    Log.Information("Brands created successfully.");
                 }
 
                 // Creación de usuarios
@@ -97,60 +97,60 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                     Role customerRole =
                         await context.Roles.FirstOrDefaultAsync(r => r.Name == "Cliente")
                         ?? throw new InvalidOperationException(
-                            "El rol de cliente no está configurado."
+                            "The customer role is not configured."
                         );
                     Role adminRole =
                         await context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin")
                         ?? throw new InvalidOperationException(
-                            "El rol de administrador no está configurado."
+                            "The administrator role is not configured."
                         );
 
-                    // Creación de usuario administrador
+                    // Administrator user creation
                     User adminUser = new User
                     {
                         FirstName =
                             configuration["User:AdminUser:FirstName"]
                             ?? throw new InvalidOperationException(
-                                "El nombre del usuario administrador no está configurado."
+                                "The administrator user name is not configured."
                             ),
                         LastName =
                             configuration["User:AdminUser:LastName"]
                             ?? throw new InvalidOperationException(
-                                "El apellido del usuario administrador no está configurado."
+                                "The administrator user last name is not configured."
                             ),
                         Email =
                             configuration["User:AdminUser:Email"]
                             ?? throw new InvalidOperationException(
-                                "El email del usuario administrador no está configurado."
+                                "The administrator user email is not configured."
                             ),
                         EmailConfirmed = true,
                         Gender =
                             configuration["User:AdminUser:Gender"]
                             ?? throw new InvalidDataException(
-                                "El Genero del usuario administrador no está configurado."
+                                "The administrator user gender is not configured."
                             ),
                         Rut =
                             configuration["User:AdminUser:Rut"]
                             ?? throw new InvalidOperationException(
-                                "El RUT del usuario administrador no está configurado."
+                                "The administrator user RUT is not configured."
                             ),
                         BirthDate = DateTime.Parse(
                             configuration["User:AdminUser:BirthDate"]
                                 ?? throw new InvalidOperationException(
-                                    "La fecha de nacimiento del usuario administrador no está configurada."
+                                    "The administrator user birth date is not configured."
                                 )
                         ),
                         PhoneNumber =
                             configuration["User:AdminUser:PhoneNumber"]
                             ?? throw new InvalidOperationException(
-                                "El número de teléfono del usuario administrador no está configurado."
+                                "The administrator user phone number is not configured."
                             ),
                     };
                     adminUser.UserName = adminUser.Email;
                     var adminPassword =
                         configuration["User:AdminUser:Password"]
                         ?? throw new InvalidOperationException(
-                            "La contraseña del usuario administrador no está configurada."
+                            "The administrator user password is not configured."
                         );
                     var adminResult = await userManager.CreateAsync(adminUser, adminPassword);
                     if (adminResult.Succeeded)
@@ -166,10 +166,10 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                                 string.Join(", ", roleResult.Errors.Select(e => e.Description))
                             );
                             throw new InvalidOperationException(
-                                "No se pudo asignar el rol de administrador al usuario."
+                                "Could not assign the administrator role to the user."
                             );
                         }
-                        Log.Information("Usuario administrador creado con éxito.");
+                        Log.Information("Administrator user created successfully.");
                     }
                     else
                     {
@@ -178,10 +178,10 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                             string.Join(", ", adminResult.Errors.Select(e => e.Description))
                         );
                         throw new InvalidOperationException(
-                            "No se pudo crear el usuario administrador."
+                            "Could not create the administrator user."
                         );
                     }
-                    // Creación de usuario fijo para pruebas
+                    // Fixed user creation for testing
                     var testUser = new User
                     {
                         FirstName = "Juan",
@@ -210,13 +210,13 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                         if (!roleResult.Succeeded)
                         {
                             Log.Error(
-                                "Error asignando rol al usuario de prueba: {Errors}",
+                                "Error assigning role to test user: {Errors}",
                                 string.Join(", ", roleResult.Errors.Select(e => e.Description))
                             );
                         }
                         else
                         {
-                            Log.Information("Usuario de prueba creado: juan.perez@example.com");
+                            Log.Information("Test user created: juan.perez@example.com");
                         }
                     }
                     else
@@ -231,7 +231,7 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                     var randomPassword =
                         configuration["User:RandomUserPassword"]
                         ?? throw new InvalidOperationException(
-                            "La contraseña de los usuarios aleatorios no está configurada."
+                            "The password for random users is not configured."
                         );
 
                     var userFaker = new Faker<User>()
@@ -258,28 +258,28 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                             if (!roleResult.Succeeded)
                             {
                                 Log.Error(
-                                    "Error asignando rol a {Email}: {Errors}",
+                                    "Error assigning role to {Email}: {Errors}",
                                     user.Email,
                                     string.Join(", ", roleResult.Errors.Select(e => e.Description))
                                 );
                                 throw new InvalidOperationException(
-                                    $"No se pudo asignar el rol de cliente al usuario {user.Email}."
+                                    $"Could not assign the customer role to user {user.Email}."
                                 );
                             }
                         }
                         else
                         {
                             Log.Error(
-                                "Error creando usuario {Email}: {Errors}",
+                                "Error creating user {Email}: {Errors}",
                                 user.Email,
                                 string.Join(", ", result.Errors.Select(e => e.Description))
                             );
                         }
                     }
-                    Log.Information("Usuarios creados con éxito.");
+                    Log.Information("Users created successfully.");
                 }
 
-                // Creación de productos
+                // Product creation
                 if (!await context.Products.AnyAsync())
                 {
                     var categoryIds = await context.Categories.Select(c => c.Id).ToListAsync();
@@ -299,7 +299,7 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
                         var products = productFaker.Generate(50);
                         await context.Products.AddRangeAsync(products);
                         await context.SaveChangesAsync();
-                        Log.Information("Productos creados con éxito.");
+                        Log.Information("Products created successfully.");
                     }
                     //pendiente*****
                     // Creación de imágenes:
@@ -320,14 +320,14 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error al inicializar la base de datos: {Message}", ex.Message);
+                Log.Error(ex, "Error initializing the database: {Message}", ex.Message);
             }
         }
 
         /// <summary>
-        /// Método para generar un RUT chileno aleatorio.
+        /// Method to generate a random Chilean RUT.
         /// </summary>
-        /// <returns>Un RUT en formato "XXXXXXXX-X".</returns>
+        /// <returns>A RUT in format "XXXXXXXX-X".</returns>
         private static string RandomRut()
         {
             var faker = new Faker();
@@ -337,9 +337,9 @@ namespace Tienda_UCN_api.src.Infrastructure.Data
         }
 
         /// <summary>
-        /// Método para generar un número de teléfono chileno aleatorio.
+        /// Method to generate a random Chilean phone number.
         /// </summary>
-        /// <returns>Un número de teléfono en formato "+569 XXXXXXXX".</returns>
+        /// <returns>A phone number in format "+569 XXXXXXXX".</returns>
         private static string RandomPhoneNumber()
         {
             var faker = new Faker();

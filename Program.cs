@@ -22,9 +22,7 @@ using TiendaUCN.src.Infrastructure.Data;
 var builder = WebApplication.CreateBuilder(args);
 var connectionStrings =
     builder.Configuration.GetConnectionString("SqliteDatabase")
-    ?? throw new InvalidOperationException(
-        "La cadena de conexion a la base de datos no esta configurada"
-    );
+    ?? throw new InvalidOperationException("The database connection string is not configured");
 
 #region OpenAPI Configuration
 /// <summary>
@@ -49,19 +47,19 @@ builder.Host.UseSerilog(
 /// Configures the application database context to use SQLite.
 /// The connection string is read from appsettings.json.
 /// </summary>
-Log.Information("Configurando base de datos SQLite");
+Log.Information("Configuring SQLite database");
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlite(connectionStrings));
 #endregion
 
 #region Hanfirer Configuration
-Log.Information("Configurando los trabajos de segundo plano de Hanfire");
+Log.Information("Configuring Hangfire background jobs");
 var cronExpression =
     builder.Configuration["Jobs:CronJobDeleteUnconfirmedUsers"]
-    ?? throw new InvalidOperationException("La exprecion cron no esta configurada");
+    ?? throw new InvalidOperationException("The CRON expression is not configured");
 #pragma warning disable CS8604 // Possible null reference argument.
 var timeZone =
     TimeZoneInfo.FindSystemTimeZoneById(builder.Configuration["Jobs:TimeZone"])
-    ?? throw new InvalidOperationException("La zona horaria para los trabajos no esta configurada");
+    ?? throw new InvalidOperationException("The time zone for jobs is not configured");
 
 // Default to daily at midnight if not set
 builder.Services.AddHangfire(configuration =>
@@ -83,7 +81,7 @@ builder.Services.AddHangfireServer();
 /// Configures ASP.NET Core Identity for user and role management.
 /// Customizes password requirements and ensures unique email addresses.
 /// </summary>
-Log.Information("Configurando Identity");
+Log.Information("Configuring Identity");
 builder
     .Services.AddIdentity<User, Role>(options =>
     {
@@ -128,14 +126,14 @@ builder
 /// <summary>
 /// Configures the Resend email service for sending verification and welcome emails.
 /// </summary>
-Log.Information("Configurando servicio de Email");
+Log.Information("Configuring Email service");
 builder.Services.AddOptions(); // Enable options pattern
 builder.Services.AddHttpClient<ResendClient>(); // Register HTTP client for Resend
 builder.Services.Configure<ResendClientOptions>(o =>
 {
     o.ApiToken =
         builder.Configuration["ResendAPIKey"] // Read API token from configuration
-        ?? throw new InvalidOperationException("El token de API de Resend no está configurado.");
+        ?? throw new InvalidOperationException("The Resend API token is not configured.");
 });
 builder.Services.AddTransient<IResend, ResendClient>(); // Inject Resend client
 #endregion
@@ -175,27 +173,25 @@ var app = builder.Build();
 
 app.UseHangfireDashboard(
     builder.Configuration["HangfireDashboard:DashboardPath"]
-        ?? throw new InvalidOperationException(
-            "La ruta del dashboard de Hangfire no esta configurado"
-        ),
+        ?? throw new InvalidOperationException("The Hangfire dashboard path is not configured"),
     new DashboardOptions
     {
         StatsPollingInterval =
             builder.Configuration.GetValue<int?>("HangfireDashboard:StatsPollingInterval")
             ?? throw new InvalidOperationException(
-                "El intervalo de actualización de estadísticas del panel de control de Hangfire no está configurado."
+                "The Hangfire dashboard stats polling interval is not configured."
             ),
         DashboardTitle =
             builder.Configuration["HangfireDashboard:DashboardTitle"]
             ?? throw new InvalidOperationException(
-                "El título del panel de control de Hangfire no está configurado."
+                "The Hangfire dashboard title is not configured."
             ),
         DisplayStorageConnectionString =
             builder.Configuration.GetValue<bool?>(
                 "HangfireDashboard:DisplayStorageConnectionString"
             )
             ?? throw new InvalidOperationException(
-                "La configuración 'HangfireDashboard:DisplayStorageConnectionString' no está definida."
+                "The 'HangfireDashboard:DisplayStorageConnectionString' setting is not defined."
             ),
     }
 );
@@ -204,7 +200,7 @@ app.UseHangfireDashboard(
 /// <summary>
 /// Applies database migrations and seeds initial data.
 /// </summary>
-Log.Information("Aplicando migraciones a la base de datos");
+Log.Information("Applying database migrations");
 using (var scope = app.Services.CreateScope())
 {
     await DataSeeder.Initialize(scope.ServiceProvider);
@@ -216,7 +212,7 @@ using (var scope = app.Services.CreateScope())
         new RecurringJobOptions { TimeZone = timeZone }
     );
     Log.Information(
-        "Trabajo recurrente '{JobId}' configurado con expresión CRON '{CronExpression}' en zona horaria '{TimeZone}'",
+        "Recurring job '{JobId}' configured with CRON expression '{CronExpression}' in time zone '{TimeZone}'",
         jobId,
         cronExpression,
         timeZone.Id

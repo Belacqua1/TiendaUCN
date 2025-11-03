@@ -3,32 +3,32 @@ namespace TiendaUCN.src.Domain.Models
     public class CartItem
     {
         /// <summary>
-        /// Identificador único del artículo en el carrito de compras.
+        /// Unique identifier of the item in the shopping cart.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Cantidad del producto en el carrito de compras.
+        /// Quantity of the product in the shopping cart.
         /// </summary>
         public int Quantity { get; set; }
 
         /// <summary>
-        /// Id del producto asociado al artículo del carrito de compras.
+        /// Id of the product associated with the cart item.
         /// </summary>
         public int ProductId { get; set; }
 
         /// <summary>
-        /// Producto asociado al artículo del carrito de compras.
+        /// Product associated with the cart item.
         /// </summary>
         public Product Product { get; set; } = null!;
 
         /// <summary>
-        /// Id del carrito de compras al que pertenece el artículo.
+        /// Id of the shopping cart to which the item belongs.
         /// </summary>
         public int CartId { get; set; }
 
         /// <summary>
-        /// Carrito de compras al que pertenece el artículo.
+        /// Shopping cart to which the item belongs.
         /// </summary>
         public Cart Cart { get; set; } = null!;
     }
